@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.controlsfx.control.SearchableComboBox?>
+
+<BorderPane minWidth="-Infinity" prefHeight="550.0" prefWidth="800.0" xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.etfbuilder.controller.CreateSystemETFSceneController">
+    <top>
+        <HBox BorderPane.alignment="CENTER">
+            <children>
+                <ToolBar prefHeight="40.0" prefWidth="800.0" HBox.hgrow="ALWAYS">
+                    <items>
+                        <Button fx:id="makeNewETFButton" mnemonicParsing="false" onAction="#switchToCreateETFScene"
+                                prefHeight="32.0" prefWidth="116.0" text="Make New ETF">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                        </Button>
+                        <Button fx:id="portfolioButton" mnemonicParsing="false" onAction="#switchToPortfolioScene"
+                                prefHeight="32.0" prefWidth="72.0" text="Portfolio">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                        </Button>
+                    </items>
+                </ToolBar>
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <VBox alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
+            </BorderPane.margin>
+            <children>
+                <GridPane alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity" prefHeight="418.0"
+                          prefWidth="770.0" style="-fx-background-color: #e2e2e2; -fx-background-radius: 5;"
+                          VBox.vgrow="ALWAYS">
+                    <columnConstraints>
+                        <ColumnConstraints fillWidth="false" halignment="CENTER" hgrow="ALWAYS" minWidth="-Infinity"
+                                           prefWidth="55.0"/>
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="-Infinity"
+                                           prefWidth="211.20003662109374"/>
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity"
+                                           prefWidth="118.39996337890625"/>
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" minWidth="-Infinity" prefWidth="112.0"/>
+                        <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="-Infinity" minWidth="-Infinity"
+                                           prefWidth="208.4000122070313"/>
+                        <ColumnConstraints fillWidth="false" halignment="CENTER" hgrow="ALWAYS" minWidth="-Infinity"
+                                           prefWidth="55.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0"
+                                        valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints minHeight="-Infinity" prefHeight="27.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="5.0" valignment="CENTER"
+                                        vgrow="ALWAYS"/>
+                        <RowConstraints minHeight="-Infinity" prefHeight="32.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints minHeight="-Infinity" prefHeight="32.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints minHeight="-Infinity" prefHeight="32.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints minHeight="-Infinity" prefHeight="32.0" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints prefHeight="45.60001220703123" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0"
+                                        valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
+                                        valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints prefHeight="34.39999999999998" valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="25.0"
+                                        valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="43.60000000000002"
+                                        valignment="CENTER" vgrow="ALWAYS"/>
+                        <RowConstraints prefHeight="30.0" valignment="CENTER" vgrow="ALWAYS"/>
+                    </rowConstraints>
+                    <children>
+                        <Spinner fx:id="netDebtSpinner" editable="true" prefHeight="15.0" prefWidth="70.0"
+                                 GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                                 GridPane.rowIndex="7" GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
+                        <Label prefHeight="22.0" prefWidth="177.0" text="Net Debt - Common Ratio"
+                               GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                               GridPane.rowIndex="7" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                            <GridPane.margin>
+                                <Insets left="25.0"/>
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="26.0" prefWidth="290.0" text="Enter weights (%) for the following fields:"
+                               GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.halignment="LEFT"
+                               GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER"
+                               GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial Bold" size="14.0"/>
+                            </font>
+                            <tooltip>
+                                <Tooltip text="The sum of the weights must equal 100">
+                                    <font>
+                                        <Font name="Arial" size="12.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Label>
+                        <Label prefHeight="22.0" prefWidth="78.0" text="Net Income" wrapText="true"
+                               GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                               GridPane.rowIndex="2" GridPane.rowSpan="2" GridPane.valignment="CENTER"
+                               GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                            <GridPane.margin>
+                                <Insets left="25.0"/>
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="22.0" prefWidth="164.0" text="Market Capitalization" GridPane.columnIndex="1"
+                               GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4"
+                               GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                            <GridPane.margin>
+                                <Insets left="25.0"/>
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="22.0" prefWidth="62.0" text="P/E ratio" GridPane.columnIndex="1"
+                               GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5"
+                               GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                            <GridPane.margin>
+                                <Insets left="25.0"/>
+                            </GridPane.margin>
+                        </Label>
+                        <Label prefHeight="22.0" prefWidth="86.0" text="Sales Growth" GridPane.columnIndex="1"
+                               GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="6"
+                               GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="14.0"/>
+                            </font>
+                            <GridPane.margin>
+                                <Insets left="25.0"/>
+                            </GridPane.margin>
+                        </Label>
+                        <Spinner fx:id="netIncomeSpinner" editable="true" prefHeight="15.0" prefWidth="70.0"
+                                 GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                                 GridPane.rowIndex="2" GridPane.rowSpan="2" GridPane.valignment="CENTER"
+                                 GridPane.vgrow="NEVER"/>
+                        <Spinner fx:id="marketCapSpinner" editable="true" prefHeight="15.0" prefWidth="70.0"
+                                 GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                                 GridPane.rowIndex="4" GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
+                        <Spinner fx:id="peRatioSpinner" editable="true" prefHeight="15.0" prefWidth="70.0"
+                                 GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                                 GridPane.rowIndex="5" GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
+                        <Spinner fx:id="salesGrowthSpinner" editable="true" prefHeight="15.0" prefWidth="70.0"
+                                 GridPane.columnIndex="2" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                                 GridPane.rowIndex="6" GridPane.valignment="CENTER" GridPane.vgrow="NEVER"/>
+                        <SearchableComboBox fx:id="industryComboBox" maxHeight="-Infinity" prefHeight="30.0"
+                                            prefWidth="118.0" GridPane.columnIndex="4" GridPane.halignment="LEFT"
+                                            GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" GridPane.valignment="CENTER"
+                                            GridPane.vgrow="NEVER"/>
+                        <Spinner fx:id="reinvestmentRateSpinner" editable="true" maxHeight="-Infinity" prefHeight="15.0"
+                                 prefWidth="70.0" GridPane.columnIndex="1" GridPane.halignment="LEFT"
+                                 GridPane.hgrow="ALWAYS" GridPane.rowIndex="10" GridPane.valignment="TOP"
+                                 GridPane.vgrow="NEVER">
+                            <GridPane.margin>
+                                <Insets/>
+                            </GridPane.margin>
+                        </Spinner>
+                        <Label prefHeight="22.0" prefWidth="142.0" text="Initial Investment" wrapText="true"
+                               GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                               GridPane.rowIndex="12" GridPane.valignment="BOTTOM" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial Bold" size="14.0"/>
+                            </font>
+                        </Label>
+                        <Label prefHeight="31.0" prefWidth="234.0" text="Reinvestment Rate (months)" wrapText="true"
+                               GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS"
+                               GridPane.rowIndex="9" GridPane.valignment="BOTTOM" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial Bold" size="14.0"/>
+                            </font>
+                        </Label>
+                        <TextField fx:id="totalToInvestTextBox" prefHeight="30.0" prefWidth="201.0"
+                                   promptText="Amount to Invest ($)" GridPane.columnIndex="1" GridPane.halignment="LEFT"
+                                   GridPane.hgrow="ALWAYS" GridPane.rowIndex="13" GridPane.valignment="CENTER"
+                                   GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial" size="12.0"/>
+                            </font>
+                        </TextField>
+                        <Label prefHeight="26.0" prefWidth="66.0" text="Industry" GridPane.columnIndex="4"
+                               GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1"
+                               GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                            <font>
+                                <Font name="Arial Bold" size="14.0"/>
+                            </font>
+                        </Label>
+                    </children>
+                    <VBox.margin>
+                        <Insets/>
+                    </VBox.margin>
+                </GridPane>
+                <Button fx:id="createETFButton" mnemonicParsing="false" onAction="#createETF" prefHeight="35.0"
+                        prefWidth="106.0" text="Create ETF" VBox.vgrow="ALWAYS">
+                    <font>
+                        <Font name="Arial monospaced for SAP" size="14.0"/>
+                    </font>
+                    <VBox.margin>
+                        <Insets top="10.0"/>
+                    </VBox.margin>
+                </Button>
+            </children>
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+        </VBox>
+    </center>
+</BorderPane>

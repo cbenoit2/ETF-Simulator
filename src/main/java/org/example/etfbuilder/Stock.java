@@ -1,15 +1,18 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
+
 public class Stock {
 
     private String name;
     private String industry;
-    private double price;
-    private double debtRatio;
-    private double netIncome;
-    private double marketCap;
-    private double salesGrowth;
-    private double peRatio;
+    private BigDecimal price;
+    private BigDecimal debtRatio;
+    private BigDecimal netIncome;
+    private BigDecimal marketCap;
+    private BigDecimal salesGrowth;
+    private BigDecimal peRatio;
 
     /**
      * Constructs a new Stock with the inputted name and its share
@@ -18,12 +21,21 @@ public class Stock {
      * @param name  the name of the stock
      * @param price the price of the stock
      */
-    public Stock(String name, double price) {
-        if (price < 0) {
+    public Stock(String name, BigDecimal price) {
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("stock price cannot be negative");
         }
         this.name = name;
         this.price = price;
+    }
+
+    /**
+     * For testing
+     *
+     * @param name the name of the stock
+     */
+    public Stock(String name) {
+        this.name = name;
     }
 
     @Override
@@ -31,66 +43,81 @@ public class Stock {
         return this.name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getIndustry() {
-        return industry;
+        return this.industry;
     }
 
     public void setIndustry(String industry) {
         this.industry = industry;
     }
 
-    public double getPrice() {
-        return price;
+    public BigDecimal getPrice() {
+        return this.price;
     }
 
-    public void setPrice(double price) {
-        if (price < 0) {
+    public void setPrice(BigDecimal price) {
+        if (price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("stock price cannot be negative");
         }
         this.price = price;
     }
 
-    public double getDebtRatio() {
-        return debtRatio;
+    public BigDecimal getDebtRatio() {
+        return this.debtRatio;
     }
 
-    public void setDebtRatio(double debtRatio) {
+    public void setDebtRatio(BigDecimal debtRatio) {
         this.debtRatio = debtRatio;
     }
 
-    public double getNetIncome() {
-        return netIncome;
+    public BigDecimal getNetIncome() {
+        return this.netIncome;
     }
 
-    public void setNetIncome(double netIncome) {
+    public void setNetIncome(BigDecimal netIncome) {
         this.netIncome = netIncome;
     }
 
-    public double getMarketCap() {
-        return marketCap;
+    public BigDecimal getMarketCap() {
+        return this.marketCap;
     }
 
-    public void setMarketCap(double marketCap) {
+    public void setMarketCap(BigDecimal marketCap) {
         this.marketCap = marketCap;
     }
 
-    public double getSalesGrowth() {
-        return salesGrowth;
+    public BigDecimal getSalesGrowth() {
+        return this.salesGrowth;
     }
 
-    public void setSalesGrowth(double salesGrowth) {
+    public void setSalesGrowth(BigDecimal salesGrowth) {
         this.salesGrowth = salesGrowth;
     }
 
-    public double getPERatio() {
-        return peRatio;
+    public BigDecimal getPERatio() {
+        return this.peRatio;
     }
 
-    public void setPERatio(double peRatio) {
+    public void setPERatio(BigDecimal peRatio) {
         this.peRatio = peRatio;
     }
+
+
+    public static class StockNameComparator implements Comparator<Stock> {
+        @Override
+        public int compare(Stock stock1, Stock stock2) {
+            String stock1Name = stock1.getName().toLowerCase();
+            String stock2Name = stock2.getName().toLowerCase();
+            return stock1Name.compareTo(stock2Name);
+        }
+    }
+
 }

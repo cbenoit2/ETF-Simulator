@@ -1,19 +1,27 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.*;
 
 public abstract class ETF implements IETF {
 
     protected boolean systemGenerated;
+    protected String name;
     protected YearMonth startDate;
-    protected double amountInvested;
+    protected BigDecimal amountInvested;
     // map of company name and a queue of stocks and the quantity for each stock
-    protected Map<String, Queue<Map.Entry<Stock, Double>>> stocksInETF;
+    protected Map<String, Queue<Map.Entry<Stock, BigDecimal>>> stocksInETF;
     // total dollar amount invested in each company
-    protected Map<String, Double> etfPositions;
+    protected Map<String, BigDecimal> etfPositions;
     protected IStockMarket stockMarket;
 
+
+    @Override
+    public void setETFName(String etfName) {
+        this.name = etfName;
+    }
 
     @Override
     public boolean isSystemGenerated() {
@@ -26,94 +34,104 @@ public abstract class ETF implements IETF {
     }
 
     @Override
-    public double getAmountInvested() {
+    public BigDecimal getAmountInvested() {
         return this.amountInvested;
     }
 
     @Override
-    public Map<String, Double> getETFPositions() {
+    public Map<String, BigDecimal> getETFPositions() {
         // returns a copy of the etfPositions Map
-        return new HashMap<>(etfPositions);
+        return Collections.unmodifiableMap(etfPositions);
     }
 
     @Override
-    public double getETFValue(YearMonth date) {
-        if (date.isBefore(startDate) || date.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
-                date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
-            return 0.0;
+    public BigDecimal getETFValue(YearMonth date) {
+        // todo: may change to throw exception
+        if (date == null || date.isBefore(startDate) || date.isBefore(IStockMarket.FIRST_DATE_ENTRY)
+                || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+            return BigDecimal.ZERO;
         }
 
-        double etfValue = 0.0;
-        for (Queue<Map.Entry<Stock, Double>> stockQueue : stocksInETF.values()) {
-            for (Map.Entry<Stock, Double> entry : stockQueue) {
+        BigDecimal etfValue = BigDecimal.ZERO;
+        for (Queue<Map.Entry<Stock, BigDecimal>> stockQueue : stocksInETF.values()) {
+            for (Map.Entry<Stock, BigDecimal> entry : stockQueue) {
                 String companyName = entry.getKey().getName();
-                double quantity = entry.getValue() / entry.getKey().getPrice();
-                double currStockPrice = stockMarket.getStock(companyName, date).getPrice();
-                etfValue += quantity * currStockPrice;
+                BigDecimal quantity = entry.getValue().divide(entry.getKey().getPrice(), RoundingMode.HALF_EVEN);
+                BigDecimal currStockPrice = stockMarket.getStock(companyName, date).getPrice();
+                etfValue = etfValue.add(currStockPrice.multiply(quantity));
             }
         }
-
         return etfValue;
     }
 
     @Override
-    public boolean addStock(String companyName, double dollars, YearMonth date) {
-        if (dollars < 0 || companyName == null || date.isBefore(startDate) ||
+    public boolean addStock(String companyName, BigDecimal dollarsToAdd, YearMonth date) {
+        if (dollarsToAdd.compareTo(BigDecimal.ZERO) < 0 || companyName == null || date.isBefore(startDate) ||
                 date.isBefore(IStockMarket.FIRST_DATE_ENTRY) || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
             return false;
         }
 
         Stock stock = stockMarket.getStock(companyName, date);
-        Queue<Map.Entry<Stock, Double>> stockQueue =
+        Queue<Map.Entry<Stock, BigDecimal>> stockQueue =
                 stocksInETF.getOrDefault(companyName, new LinkedList<>());
-        stockQueue.add(new AbstractMap.SimpleEntry<>(stock, dollars));
+        stockQueue.add(new AbstractMap.SimpleEntry<>(stock, dollarsToAdd));
         stocksInETF.putIfAbsent(companyName, stockQueue);
 
-        amountInvested += dollars;
-        double positionInCompany = etfPositions.getOrDefault(companyName, 0.0);
-        etfPositions.put(companyName, positionInCompany + dollars);
+        amountInvested = amountInvested.add(dollarsToAdd);
+        BigDecimal positionInCompany = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
+        etfPositions.put(companyName, positionInCompany.add(dollarsToAdd));
 
         return true;
     }
 
     @Override
-    public boolean removeStock(String companyName, double dollars) {
-        if (dollars < 0 || companyName == null) {
+    public boolean removeStock(String companyName, BigDecimal dollarsToRemove) {
+        if (dollarsToRemove.compareTo(BigDecimal.ZERO) < 0 || companyName == null) {
             return false;
         }
 
-        double positionInCompany = etfPositions.getOrDefault(companyName, 0.0);
-        if (dollars > positionInCompany) {
+        BigDecimal positionInCompany = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
+        if (dollarsToRemove.compareTo(positionInCompany) > 0) {
             return false;
         }
-
-        Queue<Map.Entry<Stock, Double>> stockQueue = stocksInETF.get(companyName);
+        Queue<Map.Entry<Stock, BigDecimal>> stockQueue = stocksInETF.get(companyName);
         if (stockQueue == null || stockQueue.isEmpty()) {
             return false;
         }
-        double totalRemoved = 0.0;
-        while (totalRemoved < dollars) {
-            Map.Entry<Stock, Double> entry = stockQueue.peek();
-            double amountOfStock = entry.getValue();
-            double toSell = 0.0;
-            if (amountOfStock <= dollars - totalRemoved) {
-                toSell = amountOfStock;
+
+        BigDecimal totalRemoved = BigDecimal.ZERO;
+        while (totalRemoved.compareTo(dollarsToRemove) < 0) {
+            Map.Entry<Stock, BigDecimal> entry = stockQueue.peek();
+            BigDecimal dollarsOfStock = entry.getValue();
+            BigDecimal amtLeftToRemove = dollarsToRemove.subtract(totalRemoved);
+            BigDecimal toSell = BigDecimal.ZERO;
+            if (dollarsOfStock.compareTo(amtLeftToRemove) <= 0) {
+                toSell = dollarsOfStock;
                 stockQueue.poll();
             } else {
-                toSell = dollars - totalRemoved;
-                entry.setValue(amountOfStock - toSell);
+                toSell = amtLeftToRemove;
+                entry.setValue(dollarsOfStock.subtract(toSell));
             }
-            totalRemoved += toSell;
-            amountInvested -= toSell;
+            totalRemoved = totalRemoved.add(toSell);
+            amountInvested = amountInvested.subtract(toSell);
         }
 
-        etfPositions.put(companyName, positionInCompany - totalRemoved);
-        if (etfPositions.get(companyName) == 0.0) {
+        etfPositions.put(companyName, positionInCompany.subtract(totalRemoved));
+        if (etfPositions.get(companyName).compareTo(BigDecimal.ZERO) == 0) {
             etfPositions.remove(companyName);
         }
 
         return true;
     }
 
+
+    @Override
+    public String toString() {
+        if (isSystemGenerated()) {
+            return this.name + " (algorithm-created)";
+        } else {
+            return this.name + " (user-created)";
+        }
+    }
 
 }

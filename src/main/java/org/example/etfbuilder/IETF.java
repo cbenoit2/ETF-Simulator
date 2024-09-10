@@ -1,41 +1,26 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Map;
 
 public interface IETF {
 
-//    String getEtfName();
-//
-//    void setEtfName(String etfName);
+    void setETFName(String etfName);
 
     boolean isSystemGenerated();
 
-    double getAmountInvested();
+    BigDecimal getAmountInvested();
 
-    boolean addStock(String companyName, double dollars, YearMonth date);
+    boolean addStock(String companyName, BigDecimal dollars, YearMonth date);
 
-    boolean removeStock(String companyName, double dollars);
+    boolean removeStock(String companyName, BigDecimal dollars);
 
-    double getETFValue(YearMonth date);
+    BigDecimal getETFValue(YearMonth date);
 
     YearMonth getStartDate();
 
-    Map<String, Double> getETFPositions();
-
-
-//    //todo separate simulateETF into a simulation class or into portfolio class
-//
-//    /**
-//     * Readjusts the decision of which stocks are included
-//     *
-//     * @param startDate The start of the simulation.
-//     * @param endDate   The end of the simulation.
-//     * @param testRate  The time period in months between re-testing portfolio.
-//     * @return An ArrayList of all the transaction events during the simulation.
-//     */
-//    TreeSet<Transaction> simulateETF(LocalDate startDate, LocalDate endDate, int testRate);
-
+    Map<String, BigDecimal> getETFPositions();
 
 }
 

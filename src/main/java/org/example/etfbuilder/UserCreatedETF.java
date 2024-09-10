@@ -1,7 +1,8 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.HashMap;
 
 public class UserCreatedETF extends ETF {
 
@@ -15,7 +16,7 @@ public class UserCreatedETF extends ETF {
         }
 
         this.systemGenerated = false;
-        this.amountInvested = 0.0;
+        this.amountInvested = BigDecimal.ZERO;
         this.stocksInETF = new HashMap<>();
         this.etfPositions = new HashMap<>();
         this.startDate = startDate;

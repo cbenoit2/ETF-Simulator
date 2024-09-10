@@ -1,22 +1,28 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.*;
 
 public class ETFAlgorithm implements IETFAlgorithm {
 
-    private IStockMarket stockMarket;
-    private double[] preferences;
-    private Set<Stock> possibleStocks;
-    private YearMonth currDate;
+    private final IStockMarket stockMarket;
+    private final double[] preferences;
+    private final Set<String> possibleCompanies;
+    private YearMonth currAlgoDate;
 
+
+    // todo: need to update possible stocks when date changes!!!!!!
+    //  methods that use possible stocks need to use updated listing NOT listing on start date
 
     public ETFAlgorithm(IStockMarket stockMarket, YearMonth startDate, double[] preferences,
                         String industry) {
         if (stockMarket == null || startDate == null || industry == null) {
             throw new IllegalArgumentException("input parameter is null");
         }
-        if (startDate.isBefore(IStockMarket.FIRST_DATE_ENTRY) || startDate.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (startDate.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
+                startDate.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
             throw new IllegalArgumentException("invalid date");
         }
         if (preferences.length != 5) {
@@ -27,107 +33,100 @@ public class ETFAlgorithm implements IETFAlgorithm {
         }
 
         this.stockMarket = stockMarket;
-        this.currDate = startDate;
+        this.currAlgoDate = startDate;
         this.preferences = preferences;
-        this.possibleStocks = selectIndustry(industry);
+        this.possibleCompanies = selectIndustry(industry, currAlgoDate);
     }
 
     @Override
-    public void setCurrDate(YearMonth date) {
-        this.currDate = date;
-    }
-
-    @Override
-    public YearMonth getCurrDate() {
-        return this.currDate;
-    }
-
-    @Override
-    public IStockMarket getStockMarket() {
-        return this.stockMarket;
-    }
-
-    @Override
-    public Set<Stock> selectIndustry(String industry) {
-        if (industry == null) {
+    public Set<String> selectIndustry(String industry, YearMonth date) {
+        if (industry == null || currAlgoDate == null) {
             return new HashSet<>();
         }
-
         industry = industry.toLowerCase();
-        Set<Stock> allStocks = stockMarket.getStocksOnDate(currDate);
-        // if user selects All, include all stocks in set
+        Set<String> stocksInIndustry = new HashSet<>();
+        // if user selects all, include all company names in set
         if (industry.equals("all")) {
-            return allStocks;
-        }
-        // otherwise, add all companies in selected industry to new set 
-        Set<Stock> stocksInIndustry = new HashSet<>();
-        for (Stock stock : allStocks) {
-            if (stock.getIndustry().toLowerCase().equals(industry)) {
-                stocksInIndustry.add(stock);
+            stocksInIndustry.addAll(stockMarket.getAllCompanyNames(date));
+        } else {
+            // otherwise, add all names of companies in the selected industry to the set
+            Set<Stock> allStocks = stockMarket.getStocksOnDate(date);
+            for (Stock stock : allStocks) {
+                if (stock.getIndustry().toLowerCase().equals(industry)) {
+                    stocksInIndustry.add(stock.getName());
+                }
             }
         }
-
         return stocksInIndustry;
     }
 
     @Override
-    public double calcStdDev(List<Double> data, double mean) {
-        if (data == null || data.isEmpty()) {
-            return 0;
-        }
-
-        double sumOfSquaredDifferences = 0;
-        for (double num : data) {
-            sumOfSquaredDifferences += Math.pow(num - mean, 2);
-        }
-
-        return Math.sqrt(sumOfSquaredDifferences / data.size());
+    public void setCurrAlgoDate(YearMonth date) {
+        this.currAlgoDate = date;
     }
 
     @Override
-    public double calcMean(List<Double> data) {
+    public YearMonth getCurrAlgoDate() {
+        return this.currAlgoDate;
+    }
+
+    @Override
+    public double calcMean(List<BigDecimal> data) {
+        // todo: may change to throw exception
         if (data == null || data.isEmpty()) {
             return 0.0;
         }
         double total = 0.0;
-        for (double num : data) {
-            total += num;
+        for (BigDecimal num : data) {
+            total += num.doubleValue();
         }
         return total / data.size();
     }
 
     @Override
-    public double[][] calcStatsForMetrics(YearMonth date) {
-        if (possibleStocks == null || date == null || date.isBefore(currDate) ||
+    public double calcStdDev(List<BigDecimal> data, double mean) {
+        // todo: may change to throw exception
+        if (data == null || data.isEmpty()) {
+            return 0;
+        }
+        double sumOfSquaredDifferences = 0;
+        for (BigDecimal num : data) {
+            sumOfSquaredDifferences += Math.pow(num.doubleValue() - mean, 2);
+        }
+        return Math.sqrt(sumOfSquaredDifferences / data.size());
+    }
+
+    @Override
+    public double[][] calcStatsForStockMetrics(YearMonth date) {
+        if (possibleCompanies == null || date == null || date.isBefore(currAlgoDate) ||
                 date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
             return new double[5][2];
         }
-
-        // stores the mean and standard deviation for each of the
-        // five metrics used to score stocks
+        // will store the mean and standard deviation for each of the five metrics used to 
+        // score stocks
         double[][] stats = new double[5][2];
-
-        // list of respective metric values for all stocks being considered
-        ArrayList<Double> debtRatios = new ArrayList<>();
-        ArrayList<Double> netIncomes = new ArrayList<>();
-        ArrayList<Double> marketCaps = new ArrayList<>();
-        ArrayList<Double> peRatios = new ArrayList<>();
-        ArrayList<Double> salesGrowths = new ArrayList<>();
-
-        for (Stock stock : possibleStocks) {
+        // lists of respective metric values for all stocks being considered
+        ArrayList<BigDecimal> debtRatios = new ArrayList<>();
+        ArrayList<BigDecimal> netIncomes = new ArrayList<>();
+        ArrayList<BigDecimal> marketCaps = new ArrayList<>();
+        ArrayList<BigDecimal> peRatios = new ArrayList<>();
+        ArrayList<BigDecimal> salesGrowths = new ArrayList<>();
+        // add metric values to respective lists
+        for (String companyName : possibleCompanies) {
+            Stock stock = stockMarket.getStock(companyName, date);
             debtRatios.add(stock.getDebtRatio());
             netIncomes.add(stock.getNetIncome());
             marketCaps.add(stock.getMarketCap());
             peRatios.add(stock.getPERatio());
             salesGrowths.add(stock.getSalesGrowth());
         }
-
+        // calculate the mean for each metric and add it to stats array
         stats[0][0] = calcMean(debtRatios);
         stats[1][0] = calcMean(netIncomes);
         stats[2][0] = calcMean(marketCaps);
         stats[3][0] = calcMean(peRatios);
         stats[4][0] = calcMean(salesGrowths);
-
+        // calculate the standard deviation for each metric and add it to stats array
         stats[0][1] = calcStdDev(debtRatios, stats[0][0]);
         stats[1][1] = calcStdDev(netIncomes, stats[1][0]);
         stats[2][1] = calcStdDev(marketCaps, stats[2][0]);
@@ -138,110 +137,101 @@ public class ETFAlgorithm implements IETFAlgorithm {
     }
 
     @Override
-    public double calcCompanyScore(Stock company, double[][] meansAndStdDevs) {
+    public double calcZScore(BigDecimal value, double mean, double stdDev) {
+        if (stdDev == 0.0) {
+            return 0.0;
+        } else {
+            return (value.doubleValue() - mean) / stdDev;
+        }
+    }
+
+    @Override
+    public double calcStockScore(String companyName, YearMonth date, double[][] meansAndStdDevs) {
         // todo: account for improper parameters
         // todo /////////////////////////////////////////////////////////////////////
-
         // array containing z-score for each metric:
-        // 0 - net debt ratio z-score
-        // 1 - net income z-score
-        // 2 - market cap z-score
-        // 3 - pe ratio z-score
-        // 4 - sales growth z-score
+        // 0: net debt ratio z-score, 1: net income z-score, 2: market cap z-score, 
+        // 3: pe ratio z-score, 4: sales growth z-score
+        Stock companyStock = stockMarket.getStock(companyName, date);
         double[] zScores = new double[5];
         // array containing metric values for inputted company
-        double[] companyMetrics = new double[]{company.getDebtRatio(), company.getNetIncome(),
-                company.getMarketCap(), company.getPERatio(), company.getSalesGrowth()};
-
+        BigDecimal[] companyMetrics = new BigDecimal[]{companyStock.getDebtRatio(),
+                companyStock.getNetIncome(), companyStock.getMarketCap(), companyStock.getPERatio(),
+                companyStock.getSalesGrowth()};
         for (int i = 0; i < 5; i++) {
             double mean = meansAndStdDevs[i][0];
             double stdDev = meansAndStdDevs[i][1];
-            double metric = companyMetrics[i];
-
+            BigDecimal metric = companyMetrics[i];
             // calculate z-score
-            if (stdDev == 0.0) {
-                zScores[i] = 0.0;
-            } else {
-                zScores[i] = (metric - mean) / stdDev;
-            }
-
-            // max z-score of 3.0, min z-score of -3.0
-            if (zScores[i] < -3.0) {
-                zScores[i] = -3.0;
-            } else if (zScores[i] > 3.0) {
-                zScores[i] = 3.0;
+            zScores[i] = calcZScore(metric, mean, stdDev);
+            // max z-score of 5.0, min z-score of -5.0
+            if (zScores[i] < -5.0) {
+                zScores[i] = -5.0;
+            } else if (zScores[i] > 5.0) {
+                zScores[i] = 5.0;
             }
         }
-
         return (-1 * zScores[0] * preferences[0]) + (zScores[1] * preferences[1]) +
                 (zScores[2] * preferences[2]) + (zScores[3] * preferences[3]) +
                 (zScores[4] * preferences[4]);
     }
 
-    public double calcWeightedAvgCompanyScore(Stock company, List<double[][]> monthlyMeansAndStdDevs) {
+    @Override
+    public double calcWeightedAvgStockScore(String companyName, YearMonth start,
+                                            List<double[][]> monthlyMeansAndStdDevs) {
         // todo: account for null and empty parameters
+        if (monthlyMeansAndStdDevs.size() == 1) {
+            return calcStockScore(companyName, start, monthlyMeansAndStdDevs.get(0));
+        }
+
         double sumOfWeightedScores = 0.0;
         double sumOfWeights = 0.0;
         for (int i = 0; i < monthlyMeansAndStdDevs.size(); i++) {
-            double score = calcCompanyScore(company, monthlyMeansAndStdDevs.get(i));
+            YearMonth currDate = start.plusMonths(i);
+            double score = calcStockScore(companyName, currDate, monthlyMeansAndStdDevs.get(i));
             double weight = Math.pow(i + 1, 1.25);
-//            double weight = Math.pow(1.25, i);
             sumOfWeightedScores += score * weight;
             sumOfWeights += weight;
         }
-
         return sumOfWeightedScores / sumOfWeights;
     }
 
 
     @Override
-    public List<Map.Entry<String, Double>> scoreStocks(YearMonth date) {
-        // todo: handle case where date entered is before currDate
-        if (date == null || possibleStocks == null || date.isBefore(currDate) ||
+    public List<Map.Entry<Stock, Double>> scoreStocks(YearMonth date) {
+        // todo: handle case where date entered is before currAlgoDate
+        if (date == null || possibleCompanies == null || date.isBefore(currAlgoDate) ||
                 date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
             return new ArrayList<>();
         }
 
         List<double[][]> meansAndStdDevs = new ArrayList<>();
-        YearMonth current = currDate;
+        YearMonth current = currAlgoDate;
         while (!current.isAfter(date)) {
-            meansAndStdDevs.add(calcStatsForMetrics(current));
+            meansAndStdDevs.add(calcStatsForStockMetrics(current));
             current = current.plusMonths(1);
         }
 
-        List<Map.Entry<String, Double>> rankings = new ArrayList<>();
-        for (Stock company : possibleStocks) {
-            double score = calcWeightedAvgCompanyScore(company, meansAndStdDevs);
-            rankings.add(new AbstractMap.SimpleEntry<>(company.getName(), score));
+        List<Map.Entry<Stock, Double>> rankings = new ArrayList<>();
+        for (String companyName : possibleCompanies) {
+            double score = calcWeightedAvgStockScore(companyName, currAlgoDate, meansAndStdDevs);
+            Stock stock = stockMarket.getStock(companyName, date);
+            rankings.add(new AbstractMap.SimpleEntry<>(stock, score));
         }
-        rankings.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+        rankings.sort(Map.Entry.<Stock, Double>comparingByValue().reversed());
         // normalize scores to be in a [0, 1] range and return rankings
         return normalizeScores(rankings);
     }
 
-    ///////////////////////////////////////////////////////////////////////
-    private List<Map.Entry<String, Double>> shiftScores(List<Map.Entry<String, Double>> rankings) {
-        double minScore = rankings.get(rankings.size() - 1).getValue();
-        if (minScore < 0) {
-            for (Map.Entry<String, Double> rank : rankings) {
-                double score = rank.getValue();
-                rank.setValue(score + (-1 * minScore) + 1);
-            }
-        }
-        return rankings;
-    }
-
-    private List<Map.Entry<String, Double>> normalizeScores(List<Map.Entry<String, Double>> rankings) {
+    private List<Map.Entry<Stock, Double>> normalizeScores(List<Map.Entry<Stock, Double>> rankings) {
         if (rankings.isEmpty()) {
             return rankings;
         }
-
         double maxScore = rankings.get(0).getValue();
         double minScore = rankings.get(rankings.size() - 1).getValue();
         double range = maxScore - minScore;
-
         if (minScore < 0) {
-            for (Map.Entry<String, Double> rank : rankings) {
+            for (Map.Entry<Stock, Double> rank : rankings) {
                 double score = rank.getValue();
                 rank.setValue((score - minScore) / range);
             }
@@ -249,66 +239,67 @@ public class ETFAlgorithm implements IETFAlgorithm {
         return rankings;
     }
 
-
     @Override
-    // determines stock selection
-    public Map<String, Double> runAlgorithm(double dollarsToInvest, YearMonth date) {
-        if (date.isBefore(currDate) || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+    public Map<String, BigDecimal> runAlgorithm(BigDecimal dollarsToInvest, YearMonth date) {
+        if (date.isBefore(currAlgoDate) || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
             return new HashMap<>();
         }
-
-        Map<String, Double> stockSelections = new HashMap<>();
-
-        List<Map.Entry<String, Double>> rankings = scoreStocks(date);
-        setCurrDate(date); // update the current date
-
-        double threshold = percentileThreshold(rankings, .35, 10);
-        // add all companies that meet the score threshold to the map of selected stocks
-        for (Map.Entry<String, Double> entry : rankings) {
-            String companyName = entry.getKey();
-            double score = entry.getValue();
-            if (score >= threshold) {
-                stockSelections.put(companyName, score);
-            } else {
-                break;
-            }
-        }
-        // sum up the scores of all the selected stocks
+        List<Map.Entry<Stock, Double>> rankings = scoreStocks(date);
+        // update the current algo date
+        this.currAlgoDate = date;
+        // sum up scores of all companies in the threshold
+        int endIndex = percentileThreshold(rankings, 70, 10, 75);
         double sumScores = 0.0;
-        for (Map.Entry<String, Double> company : stockSelections.entrySet()) {
-            sumScores += company.getValue();
+        for (int i = 0; i <= endIndex; i++) {
+            Map.Entry<Stock, Double> entry = rankings.get(i);
+            double score = entry.getValue();
+            sumScores += score;
         }
+        // todo fix comment
         // for each selected stock, invest an amount that is proportional to the 
         // stock's calculated score divided by the sum of all the scores
-        // todo fix comment
-        double investedSoFar = 0.0;
-        for (Map.Entry<String, Double> company : stockSelections.entrySet()) {
-            double score = company.getValue();
-            double proportion = score / sumScores;
-            double toInvest = Math.min(proportion * dollarsToInvest, dollarsToInvest - investedSoFar);
-            company.setValue(toInvest);
+        Map<String, BigDecimal> investmentsToMake = new HashMap<>();
+        BigDecimal investedSoFar = BigDecimal.ZERO;
+        for (int i = 0; i <= endIndex; i++) {
+            BigDecimal remainingDollars = dollarsToInvest.subtract(investedSoFar);
+            Map.Entry<Stock, Double> entry = rankings.get(i);
+            Stock stock = entry.getKey();
+            BigDecimal stockPrice = stock.getPrice();
+            double score = entry.getValue();
+            BigDecimal proportion = new BigDecimal(score / sumScores);
+            BigDecimal toInvest = dollarsToInvest.multiply(proportion).setScale(2,
+                    RoundingMode.HALF_EVEN);
 
-            investedSoFar += toInvest;
+            BigDecimal quantity = toInvest.divide(stockPrice, 8, RoundingMode.HALF_EVEN);
+            toInvest = quantity.multiply(stockPrice);
+
+            if (i == endIndex && remainingDollars.compareTo(toInvest) > 0) {
+                toInvest = remainingDollars;
+            }
+            investmentsToMake.put(stock.getName(), toInvest);
+            investedSoFar = investedSoFar.add(toInvest);
         }
 
-        return stockSelections;
+        return investmentsToMake;
     }
 
-
-    private double percentileThreshold(List<Map.Entry<String, Double>> stockRankings, double percentile, int minNumOfStocks) {
-        // todo error handling
-        if (stockRankings.isEmpty() || percentile < 0 || minNumOfStocks < 0) {
-            return -1;
-        }
-
-        int targetIndex = (int) Math.ceil(percentile * stockRankings.size()) - 1;
+    private int percentileThreshold(List<Map.Entry<Stock, Double>> stockRankings,
+                                    double percentile, int minNumStocks, int maxNumStocks) {
+        int targetIndex = ((int) Math.ceil(((100 - percentile) / 100) * stockRankings.size())) - 1;
         targetIndex = Math.max(0, targetIndex);
-        int minIndex = Math.min(stockRankings.size() - 1, minNumOfStocks - 1);
-
+        int minIndex = Math.min(stockRankings.size(), minNumStocks) - 1;
+        int maxIndex = Math.min(stockRankings.size(), maxNumStocks) - 1;
+        // return the index corresponding to the minimum number of stocks if target index is 
+        // less than min index 
         if (targetIndex < minIndex) {
-            return stockRankings.get(minIndex).getValue();
+            return minIndex;
+        } else if (targetIndex > maxIndex) {
+            // return the index corresponding to the maximum number of stocks if target index is 
+            // greater than max index 
+            return maxIndex;
         }
-        return stockRankings.get(targetIndex).getValue();
+        // otherwise, return the index associated with the percentile
+        return targetIndex;
     }
 
 

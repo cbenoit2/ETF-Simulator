@@ -1,25 +1,18 @@
 package org.example.etfbuilder;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface IETFAlgorithm {
 
+    Set<String> selectIndustry(String industry, YearMonth date);
 
-    void setCurrDate(YearMonth date);
+    void setCurrAlgoDate(YearMonth date);
 
-    YearMonth getCurrDate();
-
-    IStockMarket getStockMarket();
-
-    /**
-     * Narrows the stock options available for inclusion by their industry.
-     *
-     * @param industry The industry focus selected by user.
-     * @return A Set of stocks included in this industry group.
-     */
-    Set<Stock> selectIndustry(String industry);
-
+    YearMonth getCurrAlgoDate();
 
     /**
      * Calculates standard deviation for a set of metrics
@@ -28,7 +21,7 @@ public interface IETFAlgorithm {
      * @param mean The mean of the associated metric data.
      * @return The standard deviation of the data set.
      */
-    double calcStdDev(List<Double> data, double mean);
+    double calcStdDev(List<BigDecimal> data, double mean);
 
     /**
      * todo /////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +29,7 @@ public interface IETFAlgorithm {
      * @param data
      * @return
      */
-    double calcMean(List<Double> data);
+    double calcMean(List<BigDecimal> data);
 
     /**
      * todo /////////////////////////////////////////////////////////////////////////////////////
@@ -44,16 +37,17 @@ public interface IETFAlgorithm {
      * @param date
      * @return
      */
-    public double[][] calcStatsForMetrics(YearMonth date);
+    double[][] calcStatsForStockMetrics(YearMonth date);
+
+    double calcZScore(BigDecimal value, double mean, double stdDev);
 
     /**
      * todo /////////////////////////////////////////////////////////////////////////////////////
-     *
-     * @param company
-     * @param meansAndStdDevs
-     * @return
      */
-    double calcCompanyScore(Stock company, double[][] meansAndStdDevs);
+    double calcStockScore(String companyName, YearMonth date, double[][] meansAndStdDevs);
+
+    double calcWeightedAvgStockScore(String companyName, YearMonth start,
+                                     List<double[][]> monthlyMeansAndStdDevs);
 
     /**
      * todo /////////////////////////////////////////////////////////////////////////////////////
@@ -61,9 +55,9 @@ public interface IETFAlgorithm {
      * @param date
      * @return
      */
-    List<Map.Entry<String, Double>> scoreStocks(YearMonth date);
+    List<Map.Entry<Stock, Double>> scoreStocks(YearMonth date);
 
 
     // determine stock selection
-    Map<String, Double> runAlgorithm(double dollarsToInvest, YearMonth date);
+    Map<String, BigDecimal> runAlgorithm(BigDecimal dollarsToInvest, YearMonth date);
 }

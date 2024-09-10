@@ -1,6 +1,7 @@
 package org.example.etfbuilder;
 
-import java.util.*;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class StockIndexer implements IStockIndexer {
 
@@ -11,10 +12,10 @@ public class StockIndexer implements IStockIndexer {
 
     @Override
     public Set<Stock> multiDimensionalIndex(Set<Stock> stocks, Set<String> searchKeys) {
-        Set<Stock> results = new TreeSet<>(Comparator.comparing(Stock::getName));
+        Set<Stock> results = new TreeSet<>(new Stock.StockNameComparator());
         for (String searchKey : searchKeys) {
-            String category = searchKey.toLowerCase().substring(0, IndexingUtils.KEY_LENGTH);
-            if (IndexingUtils.STRING_KEYS.contains(category)) {
+            String category = searchKey.toLowerCase().substring(0, IndexingUtils.PREFIX_LENGTH);
+            if (IndexingUtils.STRING_PREFIXES.contains(category)) {
                 stocks = index(new IndexOnStringField(), stocks, searchKey);
             } else {
                 stocks = index(new IndexOnNumericalField(), stocks, searchKey);

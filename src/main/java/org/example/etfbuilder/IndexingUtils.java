@@ -1,6 +1,8 @@
 package org.example.etfbuilder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -11,23 +13,23 @@ import java.util.function.Supplier;
 public class IndexingUtils {
 
     /**
-     * Category keys corresponding to different types of Stock metrics
+     * Category prefixes corresponding to different types of Stock metrics
      */
-    public static final String NAME_KEY = "na";
-    public static final String PRICE_KEY = "pr";
-    public static final String INDUSTRY_KEY = "in";
-    public static final String MARKET_CAP_KEY = "mc";
-    public static final String SALES_KEY = "sg";
-    public static final String NET_INCOME_KEY = "ni";
-    public static final String PE_RATIO_KEY = "pe";
-    public static final String DEBT_RATIO_KEY = "de";
-    public static final Integer KEY_LENGTH = 2;
+    public static final String NAME_PREFIX = "na";
+    public static final String PRICE_PREFIX = "pr";
+    public static final String INDUSTRY_PREFIX = "in";
+    public static final String MARKET_CAP_PREFIX = "mc";
+    public static final String SALES_GROWTH_PREFIX = "sg";
+    public static final String NET_INCOME_PREFIX = "ni";
+    public static final String PE_RATIO_PREFIX = "pe";
+    public static final String DEBT_RATIO_PREFIX = "de";
+    public static final Integer PREFIX_LENGTH = 2;
 
-    public static final Set<String> STRING_KEYS = new HashSet<>
-            (Arrays.asList(NAME_KEY, INDUSTRY_KEY));
-    public static final Set<String> NUMERICAL_KEYS = new HashSet<>
-            (Arrays.asList(PRICE_KEY, MARKET_CAP_KEY, SALES_KEY, NET_INCOME_KEY, PE_RATIO_KEY,
-                    DEBT_RATIO_KEY));
+    public static final Set<String> STRING_PREFIXES = new HashSet<>
+            (Arrays.asList(NAME_PREFIX, INDUSTRY_PREFIX));
+    public static final Set<String> NUMERICAL_PREFIXES = new HashSet<>
+            (Arrays.asList(PRICE_PREFIX, MARKET_CAP_PREFIX, SALES_GROWTH_PREFIX, NET_INCOME_PREFIX,
+                    PE_RATIO_PREFIX, DEBT_RATIO_PREFIX));
 
     /**
      * Helper function for getMetricForCategory()
@@ -63,24 +65,24 @@ public class IndexingUtils {
      */
     public static Supplier<?> getMetricForCategory(Stock s, String category) {
         switch (category) {
-            case (NAME_KEY):
+            case (NAME_PREFIX):
                 return getMetricSupplier(s, stock -> s.getName());
-            case (INDUSTRY_KEY):
+            case (INDUSTRY_PREFIX):
                 return getMetricSupplier(s, stock -> s.getIndustry());
-            case (PRICE_KEY):
+            case (PRICE_PREFIX):
                 return getMetricSupplier(s, stock -> s.getPrice());
-            case (MARKET_CAP_KEY):
+            case (MARKET_CAP_PREFIX):
                 return getMetricSupplier(s, stock -> s.getMarketCap());
-            case (SALES_KEY):
+            case (SALES_GROWTH_PREFIX):
                 return getMetricSupplier(s, stock -> s.getSalesGrowth());
-            case (NET_INCOME_KEY):
+            case (NET_INCOME_PREFIX):
                 return getMetricSupplier(s, stock -> s.getNetIncome());
-            case (PE_RATIO_KEY):
+            case (PE_RATIO_PREFIX):
                 return getMetricSupplier(s, stock -> s.getPERatio());
-            case (DEBT_RATIO_KEY):
+            case (DEBT_RATIO_PREFIX):
                 return getMetricSupplier(s, stock -> s.getDebtRatio());
             default:
-                throw new IllegalArgumentException("Invalid key entered");
+                throw new IllegalArgumentException("Invalid category prefix");
         }
     }
 

@@ -1,8 +1,7 @@
 package org.example.etfbuilder;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,10 +21,20 @@ public interface IStockMarket {
     Stock getStock(String companyName, YearMonth date);
 
 
+    boolean addStock(Stock newStock, YearMonth date);
+
     /**
      * Returns the set of stock objects that exist on a given date
      */
     Set<Stock> getStocksOnDate(YearMonth date);
+
+    BigDecimal getSP500ValueOnDate(YearMonth date);
+
+    boolean addSP500Value(BigDecimal value, YearMonth date);
+
+    Map<YearMonth, BigDecimal> getSP500Data();
+
+    Set<String> getAllCompanyNames(YearMonth date);
 
 
 //    /**

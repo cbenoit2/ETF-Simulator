@@ -1,5 +1,8 @@
 package org.example.etfbuilder;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Map;
 
@@ -16,7 +19,7 @@ public interface IDataParser {
      * @return A map of dates, each of which is mapped to a map of company names and the Stock
      * object for the company on the respective date.
      */
-    Map<YearMonth, Map<String, Stock>> parseStockData(String csvFile);
+    Map<YearMonth, Map<String, Stock>> parseStockData(String csvFile) throws IOException;
 
     /**
      * Helper method for parseStockData()
@@ -30,7 +33,7 @@ public interface IDataParser {
      *             YOY sales growth %, and net debt ratio %
      * @return A Stock containing the information in {@param data}
      */
-    public Stock createStockFromData(String name, String[] data);
+    Stock createStockFromData(String name, String[] data);
 
 
     /**
@@ -41,6 +44,6 @@ public interface IDataParser {
      * @param csvFile the formatted csv file name to parse
      * @return A map of dates and the SPX Index's value on the respective date
      */
-    Map<YearMonth, Double> parseSP500MarketData(String csvFile);
+    Map<YearMonth, BigDecimal> parseSP500MarketData(String csvFile) throws IOException;
 
 }

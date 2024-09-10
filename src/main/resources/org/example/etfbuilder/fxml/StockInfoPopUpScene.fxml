@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane prefHeight="291.0" prefWidth="378.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.etfbuilder.controller.PopUpSceneController">
+    <children>
+        <Button alignment="CENTER" contentDisplay="CENTER" layoutX="86.0" layoutY="250.0" mnemonicParsing="false"
+                onAction="#addStockToChosenStocksTable" prefHeight="30.0" prefWidth="96.0" text="Add to ETF">
+            <font>
+                <Font name="Arial monospaced for SAP" size="12.0"/>
+            </font>
+        </Button>
+        <Button alignment="CENTER" layoutX="196.0" layoutY="250.0" mnemonicParsing="false" onAction="#closePopUp"
+                prefHeight="30.0" prefWidth="96.0" text="Cancel">
+            <font>
+                <Font name="Arial monospaced for SAP" size="12.0"/>
+            </font>
+        </Button>
+        <TableView fx:id="stockInfoTable" layoutX="40.0" layoutY="10.0" prefHeight="177.0" prefWidth="298.0">
+            <columns>
+                <TableColumn fx:id="stockMetricName" prefWidth="152.79999160766602"/>
+                <TableColumn fx:id="stockMetricValue" minWidth="0.0" prefWidth="151.1999969482422"/>
+            </columns>
+        </TableView>
+        <Spinner fx:id="quantitySpinner" editable="true" layoutX="196.0" layoutY="204.0" prefHeight="30.0"
+                 prefWidth="96.0"/>
+        <Label layoutX="39.0" layoutY="211.0" prefHeight="16.0" prefWidth="151.0" text="Quantity to Purchase">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+    </children>
+</AnchorPane>

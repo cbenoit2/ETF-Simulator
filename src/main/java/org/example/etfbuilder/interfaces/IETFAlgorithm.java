@@ -1,4 +1,6 @@
-package org.example.etfbuilder;
+package org.example.etfbuilder.interfaces;
+
+import org.example.etfbuilder.Stock;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -9,8 +11,6 @@ import java.util.Set;
 public interface IETFAlgorithm {
 
     Set<String> selectIndustry(String industry, YearMonth date);
-
-    void setCurrAlgoDate(YearMonth date);
 
     YearMonth getCurrAlgoDate();
 

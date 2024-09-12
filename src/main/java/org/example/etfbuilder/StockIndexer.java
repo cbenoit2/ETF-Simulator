@@ -1,5 +1,8 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IIndexStrategy;
+import org.example.etfbuilder.interfaces.IStockIndexer;
+
 import java.util.Set;
 import java.util.TreeSet;
 

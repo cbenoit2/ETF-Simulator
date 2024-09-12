@@ -14,6 +14,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import org.example.etfbuilder.*;
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IPortfolio;
+import org.example.etfbuilder.interfaces.IStockMarket;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;

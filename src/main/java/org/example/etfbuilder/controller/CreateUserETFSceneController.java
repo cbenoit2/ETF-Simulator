@@ -3,18 +3,16 @@ package org.example.etfbuilder.controller;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.controlsfx.control.SearchableComboBox;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 import org.example.etfbuilder.*;
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IStockIndexer;
+import org.example.etfbuilder.interfaces.IStockMarket;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -74,20 +72,6 @@ public class CreateUserETFSceneController {
                 minNetIncomeText, maxNetIncomeText, minMarketCapText, maxMarketCapText,
                 minPERatioText, maxPERatioText, minSalesGrowthText, maxSalesGrowthText,
                 minNetDebtText, maxNetDebtText};
-        //todo format text box after numbers are entered
-//        for (TextField textBox : toFormat) {
-//            textBox.textProperty().addListener((observable, oldValue, newValue) -> {
-//                DecimalFormat format = new DecimalFormat("#,###.##");
-//                String formattedStr;
-//                if (newValue.matches("\\d*")) {
-//                    formattedStr = format.format(Double.parseDouble(newValue));
-//                } else {
-//                    formattedStr = newValue.replaceAll("[^\\d]", "");
-//                    formattedStr = format.format(Double.parseDouble(formattedStr));
-//                }
-//                textBox.setText(formattedStr);
-//            });
-//        }
 
         // add all stocks to stock results ListView
         Set<Stock> allStocks = new TreeSet<>(new Stock.StockNameComparator());
@@ -204,8 +188,8 @@ public class CreateUserETFSceneController {
         IETF etf = new UserCreatedETF(stockMarket, startDate);
         for (ChosenStocksTableData data : chosenStocksTable.getItems()) {
             String companyName = data.getCompanyName();
-            BigDecimal total = data.getTotalDollars();
-            etf.addStock(companyName, total, startDate);
+            BigDecimal quantity = new BigDecimal(data.getQuantity());
+            etf.buyStock(companyName, quantity, startDate);
         }
         app.addETFToPortfolio(etf);
         app.switchToPortfolioScene();

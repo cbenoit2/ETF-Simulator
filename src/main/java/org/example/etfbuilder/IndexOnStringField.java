@@ -1,5 +1,7 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IIndexStrategy;
+
 import java.util.*;
 import java.util.function.Supplier;
 

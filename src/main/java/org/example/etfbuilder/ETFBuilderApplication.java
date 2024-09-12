@@ -7,18 +7,14 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.etfbuilder.controller.*;
+import org.example.etfbuilder.interfaces.*;
 
 import java.io.IOException;
 import java.time.YearMonth;
 
+// run with vm options: --add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls
 
 public class ETFBuilderApplication extends Application {
-
-    // todo: error handling, validation, 
-    //  code cleanup, make comments, documentation, 
-    //  testing
-    //  organize folders
-    //  how to scale everything
 
     public static final String[] INDUSTRIES = new String[]{"All", "Communication Services",
             "Consumer Discretionary", "Consumer Staples", "Energy", "Financials", "Health Care",

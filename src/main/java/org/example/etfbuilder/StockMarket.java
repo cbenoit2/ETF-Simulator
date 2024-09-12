@@ -1,5 +1,7 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IStockMarket;
+
 import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package org.example.etfbuilder;
+package org.example.etfbuilder.interfaces;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;

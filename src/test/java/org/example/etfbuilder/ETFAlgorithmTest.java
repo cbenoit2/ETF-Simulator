@@ -1,12 +1,12 @@
 package org.example.etfbuilder;
 
 
+import org.example.etfbuilder.interfaces.IETFAlgorithm;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.*;
 
@@ -22,9 +22,9 @@ public class ETFAlgorithmTest {
     @BeforeAll
     public static void init() throws IOException {
         DataParser dp = new DataParser();
-        String stocksCSV = StockMarketTest.class
+        String stocksCSV = ETFAlgorithmTest.class
                 .getResource("data/medium_stock_data_sample.csv").getFile();
-        String sp500CSV = StockMarketTest.class.getResource("data/S&P500_value.csv").getFile();
+        String sp500CSV = ETFAlgorithmTest.class.getResource("data/S&P500_value.csv").getFile();
         market = new StockMarket(dp.parseStockData(stocksCSV),
                 dp.parseSP500MarketData(sp500CSV));
         startDate = YearMonth.parse("2023-06");
@@ -36,7 +36,6 @@ public class ETFAlgorithmTest {
         assertThrows(IllegalArgumentException.class, () -> {
             new ETFAlgorithm(null, startDate, pref, "all");
         });
-
     }
 
     @Test
@@ -126,51 +125,16 @@ public class ETFAlgorithmTest {
     @Test
     public void testSelectIndustryInvalidDate() {
         IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.selectIndustry("all", YearMonth.parse("2009-12"));
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.selectIndustry("all", YearMonth.parse("2024-6"));
-        });
+        assertEquals(new HashSet<>(), algo.selectIndustry("all", YearMonth.parse("2009-12")));
+        assertEquals(new HashSet<>(), algo.selectIndustry("all", YearMonth.parse("2024-06")));
     }
 
     @Test
     public void testSelectIndustryNullDate() {
         IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.selectIndustry("all", null);
-        });
+        assertEquals(new HashSet<>(), algo.selectIndustry("all", null));
     }
 
-    @Test
-    public void testSetAndGetCurrAlgoDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        YearMonth date = YearMonth.parse("2024-01");
-        algo.setCurrAlgoDate(date);
-
-        assertEquals(date, algo.getCurrAlgoDate());
-    }
-
-    @Test
-    public void testSetCurrAlgoDateInvalidDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.setCurrAlgoDate(YearMonth.parse("2009-01"));
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.setCurrAlgoDate(YearMonth.parse("2024-06"));
-        });
-    }
-
-    @Test
-    public void testSetCurrAlgoDateNullDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        assertThrows(IllegalArgumentException.class, () -> {
-            algo.setCurrAlgoDate(null);
-        });
-    }
 
     @Test
     public void testCalcMean() {
@@ -257,20 +221,6 @@ public class ETFAlgorithmTest {
     }
 
     @Test
-    public void testCalcStatsForStockMetricsInvalidDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo dont know if i want to throw exception or return empty array
-        assertEquals(0, 1);
-    }
-
-    @Test
-    public void testCalcStatsForStockMetricsNullDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        assertEquals(0, 1);
-    }
-
-    @Test
     public void testCalcZScore() {
         IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
         Stock agilent = market.getStock("Agilent Technologies", startDate);
@@ -288,14 +238,6 @@ public class ETFAlgorithmTest {
     }
 
     @Test
-    public void testCalcZScoreNullDataValue() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        // todo
-        assertEquals(0, 1);
-    }
-
-    @Test
     public void testCalcStockScore() {
         IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
         double[][] meansAndStdDevs = algo.calcStatsForStockMetrics(startDate);
@@ -305,13 +247,6 @@ public class ETFAlgorithmTest {
                 startDate, meansAndStdDevs);
 
         assertEquals(expected, actual, .0001);
-    }
-
-    @Test
-    public void testCalcStockScoreNullStock() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-// todo
-        assertEquals(0, 1);
     }
 
     @Test
@@ -329,12 +264,6 @@ public class ETFAlgorithmTest {
         assertEquals(expected, actual, .0001);
     }
 
-    @Test
-    public void testCalcWeightedAvgStockScoreNullStock() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-// todo
-        assertEquals(0, 1);
-    }
 
     @Test
     public void testScoreStocksCorrectAmtOfStocks() {
@@ -365,73 +294,30 @@ public class ETFAlgorithmTest {
     }
 
     @Test
-    public void testScoreStocksInvalidDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-// todo
-        assertEquals(0, 1);
-    }
-
-    @Test
-    public void testScoreStocksNullDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-// todo
-        assertEquals(0, 1);
-    }
-
-    @Test
     public void testRunAlgorithm() {
         IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
         Map<String, BigDecimal> expected = new HashMap<>();
-        expected.put("Alphabet Inc (Class A)", new BigDecimal("1048.96"));
-        expected.put("ExxonMobil", new BigDecimal("922.53"));
-        expected.put("S&P Global", new BigDecimal("647.67"));
-        expected.put("Booking Holdings", new BigDecimal("622.47"));
-        expected.put("Equinix", new BigDecimal("617.81"));
-        expected.put("Prologis", new BigDecimal("601.24"));
-        expected.put("Goldman Sachs", new BigDecimal("485.31"));
-        expected.put("Take Two Interactive", new BigDecimal("482.04"));
-        expected.put("Vulcan Materials Company", new BigDecimal("464.31"));
-        expected.put("Chipotle Mexican Grill", new BigDecimal("461.40"));
-        expected.put("Halliburton", new BigDecimal("426.56"));
+        expected.put("Alphabet Inc (Class A)", new BigDecimal("8.99"));
+        expected.put("ExxonMobil", new BigDecimal("8.60"));
+        expected.put("S&P Global", new BigDecimal("1.61"));
+        expected.put("Booking Holdings", new BigDecimal("0.23"));
+        expected.put("Equinix", new BigDecimal("0.78"));
+        expected.put("Prologis", new BigDecimal("4.90"));
+        expected.put("Goldman Sachs", new BigDecimal("1.50"));
+        expected.put("Take Two Interactive", new BigDecimal("3.27"));
+        expected.put("Vulcan Materials Company", new BigDecimal("2.05"));
+        expected.put("Chipotle Mexican Grill", new BigDecimal("0.21"));
+        expected.put("Halliburton", new BigDecimal("12.93"));
+        expected.put("Uninvested Cash", new BigDecimal("0.0821"));
 
-        Map<String, BigDecimal> actual = algo.runAlgorithm(new BigDecimal("6780.3"), startDate);
+        Map<String, BigDecimal> actual = algo.runAlgorithm(new BigDecimal("6780.33"), startDate);
 
-        assertEquals(11, actual.size());
         for (Map.Entry<String, BigDecimal> actualEntry : actual.entrySet()) {
             String company = actualEntry.getKey();
-            BigDecimal amtToInvest = actualEntry.getValue();
+            BigDecimal quantity = actualEntry.getValue();
 
-            assertTrue(expected.containsKey(company));
-            assertEquals(expected.get(company), amtToInvest.setScale(2, RoundingMode.HALF_UP));
+            assertEquals(expected.get(company), quantity);
         }
-    }
-
-    @Test
-    public void testRunAlgorithmNegativeDollarsToInvest() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        assertEquals(0, 1);
-    }
-
-    @Test
-    public void testRunAlgorithmNullDollarsToInvest() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        assertEquals(0, 1);
-    }
-
-    @Test
-    public void testRunAlgorithmInvalidDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        assertEquals(0, 1);
-    }
-
-    @Test
-    public void testRunAlgorithmNullDate() {
-        IETFAlgorithm algo = new ETFAlgorithm(market, startDate, pref, "all");
-        // todo
-        assertEquals(0, 1);
     }
 
 

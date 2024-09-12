@@ -7,4 +7,6 @@ module org.example.etfbuilder {
     exports org.example.etfbuilder;
     exports org.example.etfbuilder.controller;
     opens org.example.etfbuilder.controller to javafx.fxml;
+    exports org.example.etfbuilder.interfaces;
+    opens org.example.etfbuilder.interfaces to javafx.fxml;
 }

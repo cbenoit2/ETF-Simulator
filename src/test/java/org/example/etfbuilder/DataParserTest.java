@@ -1,6 +1,7 @@
 package org.example.etfbuilder;
 
 
+import org.example.etfbuilder.interfaces.IDataParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;

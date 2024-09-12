@@ -1,5 +1,8 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IPortfolio;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;

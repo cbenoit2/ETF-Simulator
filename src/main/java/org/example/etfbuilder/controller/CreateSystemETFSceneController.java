@@ -7,6 +7,9 @@ import javafx.scene.control.TextField;
 
 import org.controlsfx.control.SearchableComboBox;
 import org.example.etfbuilder.*;
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IETFAlgorithm;
+import org.example.etfbuilder.interfaces.IStockMarket;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;

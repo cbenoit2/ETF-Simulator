@@ -1,6 +1,7 @@
-package org.example.etfbuilder;
+package org.example.etfbuilder.interfaces;
 
-import java.io.FileNotFoundException;
+import org.example.etfbuilder.Stock;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.YearMonth;

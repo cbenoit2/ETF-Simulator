@@ -1,5 +1,7 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IStockIndexer;
+import org.example.etfbuilder.interfaces.IStockMarket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +20,7 @@ public class StockIndexerTest {
     public static void init() throws IOException {
         DataParser dp = new DataParser();
         String stocksCSV = StockMarketTest.class
-                .getResource("org/example/etfbuilder/data/medium_stock_data_sample.csv").getFile();
+                .getResource("data/medium_stock_data_sample.csv").getFile();
         String sp500CSV = StockMarketTest.class.getResource("data/S&P500_value.csv").getFile();
         IStockMarket market = new StockMarket(dp.parseStockData(stocksCSV),
                 dp.parseSP500MarketData(sp500CSV));

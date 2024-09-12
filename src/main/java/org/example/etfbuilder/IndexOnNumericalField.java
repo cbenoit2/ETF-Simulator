@@ -1,5 +1,7 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IIndexStrategy;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Supplier;

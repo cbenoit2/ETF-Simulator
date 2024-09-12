@@ -1,4 +1,4 @@
-package org.example.etfbuilder;
+package org.example.etfbuilder.interfaces;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -12,9 +12,9 @@ public interface IETF {
 
     BigDecimal getAmountInvested();
 
-    boolean addStock(String companyName, BigDecimal dollars, YearMonth date);
+    boolean buyStock(String companyName, BigDecimal quantityToBuy, YearMonth buyDate);
 
-    boolean removeStock(String companyName, BigDecimal dollars);
+    boolean sellStock(String companyName, BigDecimal quantityToSell, YearMonth sellDate);
 
     BigDecimal getETFValue(YearMonth date);
 

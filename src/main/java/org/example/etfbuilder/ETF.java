@@ -1,17 +1,20 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IStockMarket;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.*;
 
 public abstract class ETF implements IETF {
-
+    
     protected boolean systemGenerated;
     protected String name;
     protected YearMonth startDate;
-    protected BigDecimal amountInvested;
-    // map of company name and a queue of stocks and the quantity for each stock
+    // map of company name and a queue of map entries consisting of 
+    // stocks and the quantity of that stock purchased
     protected Map<String, Queue<Map.Entry<Stock, BigDecimal>>> stocksInETF;
     // total dollar amount invested in each company
     protected Map<String, BigDecimal> etfPositions;
@@ -35,95 +38,92 @@ public abstract class ETF implements IETF {
 
     @Override
     public BigDecimal getAmountInvested() {
-        return this.amountInvested;
+        return etfPositions.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
     public Map<String, BigDecimal> getETFPositions() {
-        // returns a copy of the etfPositions Map
+        // return a copy of the etfPositions Map
         return Collections.unmodifiableMap(etfPositions);
     }
 
     @Override
     public BigDecimal getETFValue(YearMonth date) {
-        // todo: may change to throw exception
-        if (date == null || date.isBefore(startDate) || date.isBefore(IStockMarket.FIRST_DATE_ENTRY)
-                || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
-            return BigDecimal.ZERO;
+        if (isInvalidDate(date)) {
+            throw new IllegalArgumentException("invalid date entered");
         }
-
         BigDecimal etfValue = BigDecimal.ZERO;
-        for (Queue<Map.Entry<Stock, BigDecimal>> stockQueue : stocksInETF.values()) {
-            for (Map.Entry<Stock, BigDecimal> entry : stockQueue) {
-                String companyName = entry.getKey().getName();
-                BigDecimal quantity = entry.getValue().divide(entry.getKey().getPrice(), RoundingMode.HALF_EVEN);
-                BigDecimal currStockPrice = stockMarket.getStock(companyName, date).getPrice();
-                etfValue = etfValue.add(currStockPrice.multiply(quantity));
-            }
+        for (String companyName : etfPositions.keySet()) {
+            BigDecimal totalQuantity = getTotalQuantityHeld(companyName);
+            BigDecimal currStockPrice = stockMarket.getStock(companyName, date).getPrice();
+            etfValue = etfValue.add(currStockPrice.multiply(totalQuantity));
         }
         return etfValue;
     }
 
     @Override
-    public boolean addStock(String companyName, BigDecimal dollarsToAdd, YearMonth date) {
-        if (dollarsToAdd.compareTo(BigDecimal.ZERO) < 0 || companyName == null || date.isBefore(startDate) ||
-                date.isBefore(IStockMarket.FIRST_DATE_ENTRY) || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+    public boolean buyStock(String companyName, BigDecimal quantityToBuy, YearMonth buyDate) {
+        if (quantityToBuy == null) {
             return false;
         }
 
-        Stock stock = stockMarket.getStock(companyName, date);
+        quantityToBuy = quantityToBuy.setScale(2, RoundingMode.DOWN);
+        if (quantityToBuy.compareTo(BigDecimal.ZERO) <= 0 || companyName == null || isInvalidDate(buyDate)) {
+            return false;
+        }
+        Stock stock = stockMarket.getStock(companyName, buyDate);
+        if (stock == null) {
+            return false;
+        }
+
         Queue<Map.Entry<Stock, BigDecimal>> stockQueue =
-                stocksInETF.getOrDefault(companyName, new LinkedList<>());
-        stockQueue.add(new AbstractMap.SimpleEntry<>(stock, dollarsToAdd));
-        stocksInETF.putIfAbsent(companyName, stockQueue);
-
-        amountInvested = amountInvested.add(dollarsToAdd);
-        BigDecimal positionInCompany = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
-        etfPositions.put(companyName, positionInCompany.add(dollarsToAdd));
-
+                stocksInETF.computeIfAbsent(companyName, k -> new LinkedList<>());
+        stockQueue.add(new AbstractMap.SimpleEntry<>(stock, quantityToBuy));
+        updateETFPositions(companyName,
+                quantityToBuy.multiply(stock.getPrice()).setScale(4, RoundingMode.UNNECESSARY));
         return true;
     }
 
     @Override
-    public boolean removeStock(String companyName, BigDecimal dollarsToRemove) {
-        if (dollarsToRemove.compareTo(BigDecimal.ZERO) < 0 || companyName == null) {
+    public boolean sellStock(String companyName, BigDecimal quantityToSell, YearMonth sellDate) {
+        if (quantityToSell == null) {
             return false;
         }
 
-        BigDecimal positionInCompany = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
-        if (dollarsToRemove.compareTo(positionInCompany) > 0) {
-            return false;
-        }
-        Queue<Map.Entry<Stock, BigDecimal>> stockQueue = stocksInETF.get(companyName);
-        if (stockQueue == null || stockQueue.isEmpty()) {
+        quantityToSell = quantityToSell.setScale(2, RoundingMode.DOWN);
+        if (quantityToSell.compareTo(BigDecimal.ZERO) <= 0 || companyName == null ||
+                etfPositions.get(companyName) == null || isInvalidDate(sellDate) ||
+                quantityToSell.compareTo(getTotalQuantityHeld(companyName)) > 0) {
             return false;
         }
 
-        BigDecimal totalRemoved = BigDecimal.ZERO;
-        while (totalRemoved.compareTo(dollarsToRemove) < 0) {
-            Map.Entry<Stock, BigDecimal> entry = stockQueue.peek();
-            BigDecimal dollarsOfStock = entry.getValue();
-            BigDecimal amtLeftToRemove = dollarsToRemove.subtract(totalRemoved);
-            BigDecimal toSell = BigDecimal.ZERO;
-            if (dollarsOfStock.compareTo(amtLeftToRemove) <= 0) {
-                toSell = dollarsOfStock;
-                stockQueue.poll();
+        // queue of all Stock objects and quantities held by ETF for specified company
+        Queue<Map.Entry<Stock, BigDecimal>> companyStockQueue = stocksInETF.get(companyName);
+        BigDecimal amtRemainingToSell = quantityToSell;
+        while (amtRemainingToSell.compareTo(BigDecimal.ZERO) > 0) {
+            Map.Entry<Stock, BigDecimal> queueEntry = companyStockQueue.peek();
+            Stock stock = queueEntry.getKey();
+            // quantity of this Stock object held by ETF
+            BigDecimal stockQuantity = queueEntry.getValue();
+
+            if (stockQuantity.compareTo(amtRemainingToSell) <= 0) {
+                companyStockQueue.poll();
+                updateETFPositions(companyName, stockQuantity.multiply(stock.getPrice()).negate());
+                amtRemainingToSell = amtRemainingToSell.subtract(stockQuantity);
             } else {
-                toSell = amtLeftToRemove;
-                entry.setValue(dollarsOfStock.subtract(toSell));
+                queueEntry.setValue(stockQuantity.subtract(amtRemainingToSell));
+                updateETFPositions(companyName, amtRemainingToSell.multiply(stock.getPrice()).negate());
+                amtRemainingToSell = BigDecimal.ZERO;
             }
-            totalRemoved = totalRemoved.add(toSell);
-            amountInvested = amountInvested.subtract(toSell);
         }
-
-        etfPositions.put(companyName, positionInCompany.subtract(totalRemoved));
         if (etfPositions.get(companyName).compareTo(BigDecimal.ZERO) == 0) {
             etfPositions.remove(companyName);
         }
-
+        if (companyStockQueue.isEmpty()) {
+            stocksInETF.remove(companyName);
+        }
         return true;
     }
-
 
     @Override
     public String toString() {
@@ -132,6 +132,27 @@ public abstract class ETF implements IETF {
         } else {
             return this.name + " (user-created)";
         }
+    }
+
+    protected boolean isInvalidDate(YearMonth date) {
+        return date == null || date.isBefore(startDate) ||
+                date.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
+                date.isAfter(IStockMarket.LAST_DATE_ENTRY);
+    }
+
+    protected BigDecimal getTotalQuantityHeld(String companyName) {
+        Queue<Map.Entry<Stock, BigDecimal>> stockQueue = stocksInETF.get(companyName);
+
+        BigDecimal totalQuantity = BigDecimal.ZERO;
+        for (Map.Entry<Stock, BigDecimal> entry : stockQueue) {
+            totalQuantity = totalQuantity.add(entry.getValue());
+        }
+        return totalQuantity;
+    }
+
+    private void updateETFPositions(String companyName, BigDecimal dollars) {
+        BigDecimal position = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
+        etfPositions.put(companyName, position.add(dollars));
     }
 
 }

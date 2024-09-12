@@ -1,4 +1,6 @@
-package org.example.etfbuilder;
+package org.example.etfbuilder.interfaces;
+
+import org.example.etfbuilder.Stock;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;

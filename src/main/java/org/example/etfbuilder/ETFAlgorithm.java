@@ -1,5 +1,8 @@
 package org.example.etfbuilder;
 
+import org.example.etfbuilder.interfaces.IETFAlgorithm;
+import org.example.etfbuilder.interfaces.IStockMarket;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.YearMonth;
@@ -11,10 +14,6 @@ public class ETFAlgorithm implements IETFAlgorithm {
     private final double[] preferences;
     private final Set<String> possibleCompanies;
     private YearMonth currAlgoDate;
-
-
-    // todo: need to update possible stocks when date changes!!!!!!
-    //  methods that use possible stocks need to use updated listing NOT listing on start date
 
     public ETFAlgorithm(IStockMarket stockMarket, YearMonth startDate, double[] preferences,
                         String industry) {
@@ -40,7 +39,7 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public Set<String> selectIndustry(String industry, YearMonth date) {
-        if (industry == null || currAlgoDate == null) {
+        if (industry == null || date == null) {
             return new HashSet<>();
         }
         industry = industry.toLowerCase();
@@ -61,20 +60,14 @@ public class ETFAlgorithm implements IETFAlgorithm {
     }
 
     @Override
-    public void setCurrAlgoDate(YearMonth date) {
-        this.currAlgoDate = date;
-    }
-
-    @Override
     public YearMonth getCurrAlgoDate() {
         return this.currAlgoDate;
     }
 
     @Override
     public double calcMean(List<BigDecimal> data) {
-        // todo: may change to throw exception
         if (data == null || data.isEmpty()) {
-            return 0.0;
+            throw new IllegalArgumentException();
         }
         double total = 0.0;
         for (BigDecimal num : data) {
@@ -85,9 +78,8 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public double calcStdDev(List<BigDecimal> data, double mean) {
-        // todo: may change to throw exception
         if (data == null || data.isEmpty()) {
-            return 0;
+            throw new IllegalArgumentException();
         }
         double sumOfSquaredDifferences = 0;
         for (BigDecimal num : data) {
@@ -98,8 +90,7 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public double[][] calcStatsForStockMetrics(YearMonth date) {
-        if (possibleCompanies == null || date == null || date.isBefore(currAlgoDate) ||
-                date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (possibleCompanies == null || isInvalidDate(date)) {
             return new double[5][2];
         }
         // will store the mean and standard deviation for each of the five metrics used to 
@@ -147,8 +138,6 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public double calcStockScore(String companyName, YearMonth date, double[][] meansAndStdDevs) {
-        // todo: account for improper parameters
-        // todo /////////////////////////////////////////////////////////////////////
         // array containing z-score for each metric:
         // 0: net debt ratio z-score, 1: net income z-score, 2: market cap z-score, 
         // 3: pe ratio z-score, 4: sales growth z-score
@@ -179,7 +168,6 @@ public class ETFAlgorithm implements IETFAlgorithm {
     @Override
     public double calcWeightedAvgStockScore(String companyName, YearMonth start,
                                             List<double[][]> monthlyMeansAndStdDevs) {
-        // todo: account for null and empty parameters
         if (monthlyMeansAndStdDevs.size() == 1) {
             return calcStockScore(companyName, start, monthlyMeansAndStdDevs.get(0));
         }
@@ -199,9 +187,7 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public List<Map.Entry<Stock, Double>> scoreStocks(YearMonth date) {
-        // todo: handle case where date entered is before currAlgoDate
-        if (date == null || possibleCompanies == null || date.isBefore(currAlgoDate) ||
-                date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (possibleCompanies == null || isInvalidDate(date)) {
             return new ArrayList<>();
         }
 
@@ -241,7 +227,7 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     @Override
     public Map<String, BigDecimal> runAlgorithm(BigDecimal dollarsToInvest, YearMonth date) {
-        if (date.isBefore(currAlgoDate) || date.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (isInvalidDate(date) || dollarsToInvest == null) {
             return new HashMap<>();
         }
         List<Map.Entry<Stock, Double>> rankings = scoreStocks(date);
@@ -255,34 +241,33 @@ public class ETFAlgorithm implements IETFAlgorithm {
             double score = entry.getValue();
             sumScores += score;
         }
-        // todo fix comment
         // for each selected stock, invest an amount that is proportional to the 
         // stock's calculated score divided by the sum of all the scores
         Map<String, BigDecimal> investmentsToMake = new HashMap<>();
         BigDecimal investedSoFar = BigDecimal.ZERO;
         for (int i = 0; i <= endIndex; i++) {
-            BigDecimal remainingDollars = dollarsToInvest.subtract(investedSoFar);
             Map.Entry<Stock, Double> entry = rankings.get(i);
             Stock stock = entry.getKey();
-            BigDecimal stockPrice = stock.getPrice();
-            double score = entry.getValue();
-            BigDecimal proportion = new BigDecimal(score / sumScores);
-            BigDecimal toInvest = dollarsToInvest.multiply(proportion).setScale(2,
-                    RoundingMode.HALF_EVEN);
+            BigDecimal proportion = new BigDecimal(entry.getValue() / sumScores);
+            BigDecimal quantityToPurchase = dollarsToInvest.multiply(proportion).divide(stock.getPrice(), 2, RoundingMode.DOWN);
+            BigDecimal toPurchaseInDollars = quantityToPurchase.multiply(stock.getPrice());
 
-            BigDecimal quantity = toInvest.divide(stockPrice, 8, RoundingMode.HALF_EVEN);
-            toInvest = quantity.multiply(stockPrice);
-
-            if (i == endIndex && remainingDollars.compareTo(toInvest) > 0) {
-                toInvest = remainingDollars;
-            }
-            investmentsToMake.put(stock.getName(), toInvest);
-            investedSoFar = investedSoFar.add(toInvest);
+            investmentsToMake.put(stock.getName(), quantityToPurchase);
+            investedSoFar = investedSoFar.add(toPurchaseInDollars);
         }
 
+        // if there is any leftover cash allocate it to the top stock and uninvested cash
+        BigDecimal leftover = dollarsToInvest.subtract(investedSoFar);
+        Stock topStock = rankings.get(0).getKey();
+        BigDecimal quantity = leftover.divide(topStock.getPrice(), 2, RoundingMode.DOWN);
+        investmentsToMake.compute(topStock.getName(), (k, v) -> v.add(quantity));
+        leftover = leftover.subtract(quantity.multiply(topStock.getPrice()));
+        if (leftover.compareTo(BigDecimal.ZERO) > 0) {
+            investmentsToMake.put("Uninvested Cash", leftover);
+        }
         return investmentsToMake;
     }
-
+    
     private int percentileThreshold(List<Map.Entry<Stock, Double>> stockRankings,
                                     double percentile, int minNumStocks, int maxNumStocks) {
         int targetIndex = ((int) Math.ceil(((100 - percentile) / 100) * stockRankings.size())) - 1;
@@ -300,6 +285,12 @@ public class ETFAlgorithm implements IETFAlgorithm {
         }
         // otherwise, return the index associated with the percentile
         return targetIndex;
+    }
+
+    private boolean isInvalidDate(YearMonth date) {
+        return date == null || date.isBefore(currAlgoDate) ||
+                date.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
+                date.isAfter(IStockMarket.LAST_DATE_ENTRY);
     }
 
 

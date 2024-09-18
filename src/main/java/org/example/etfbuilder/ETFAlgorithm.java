@@ -1,5 +1,5 @@
 /**
- * @author Chloe Benoit and Justin Summers (justin2justin)
+ * @author Chloe Benoit (cbenoit2) and Justin Summers (justin2justin)
  */
 
 package org.example.etfbuilder;

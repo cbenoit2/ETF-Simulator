@@ -1,3 +1,7 @@
+/**
+ * @author Chloe Benoit (cbenoit2) and Ana Bernal (anabernalmcc04)
+ */
+
 package org.example.etfbuilder;
 
 import org.example.etfbuilder.interfaces.IStockMarket;

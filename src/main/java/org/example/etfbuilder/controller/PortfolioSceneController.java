@@ -13,7 +13,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import org.example.etfbuilder.*;
+import org.example.etfbuilder.ETFBuilderApplication;
+import org.example.etfbuilder.SystemGeneratedETF;
 import org.example.etfbuilder.interfaces.IETF;
 import org.example.etfbuilder.interfaces.IPortfolio;
 import org.example.etfbuilder.interfaces.IStockMarket;
@@ -101,10 +102,10 @@ public class PortfolioSceneController {
             return;
         }
         Map<YearMonth, BigDecimal[]> etfReturns =
-                portfolio.getETFReturns(selectedETF, startDate, IStockMarket.LAST_DATE_ENTRY);
+                portfolio.getETFReturns(selectedETF, startDate, stockMarket.getLastDateEntry());
         Map<YearMonth, BigDecimal> marketReturns =
                 portfolio.getMarketReturns(stockMarket.getSP500Data(), startDate,
-                        IStockMarket.LAST_DATE_ENTRY);
+                        stockMarket.getLastDateEntry());
         XYChart.Series<String, BigDecimal> etfSeries = new XYChart.Series<>();
         etfSeries.setName("ETF");
         XYChart.Series<String, BigDecimal> marketSeries = new XYChart.Series<>();
@@ -153,7 +154,7 @@ public class PortfolioSceneController {
             return;
         }
         Map<YearMonth, BigDecimal[]> etfReturns =
-                portfolio.getETFReturns(selectedETF, startDate, IStockMarket.LAST_DATE_ENTRY);
+                portfolio.getETFReturns(selectedETF, startDate, stockMarket.getLastDateEntry());
         XYChart.Series<String, BigDecimal> series = new XYChart.Series<>();
 
         drawETFReturnsChart(series, etfReturns);
@@ -179,10 +180,10 @@ public class PortfolioSceneController {
     private void formatText(XYChart.Series<String, BigDecimal> series,
                             Map<YearMonth, BigDecimal[]> etfReturns) {
         // set up labels and chart coloring
-        BigDecimal etfValue = etfReturns.get(IStockMarket.LAST_DATE_ENTRY)[0];
-        BigDecimal returnsDollars = etfReturns.get(IStockMarket.LAST_DATE_ENTRY)[1];
+        BigDecimal etfValue = etfReturns.get(stockMarket.getLastDateEntry())[0];
+        BigDecimal returnsDollars = etfReturns.get(stockMarket.getLastDateEntry())[1];
         BigDecimal returnsPercentage =
-                etfReturns.get(IStockMarket.LAST_DATE_ENTRY)[2].multiply(new BigDecimal(100));
+                etfReturns.get(stockMarket.getLastDateEntry())[2].multiply(new BigDecimal(100));
         String valueStr = String.format("$%,.2f", etfValue);
         etfValueLabel.setText(valueStr);
         Text returnsText = null;
@@ -192,15 +193,15 @@ public class PortfolioSceneController {
             returnsText.setFill(Color.GREEN);
             series.getNode().setStyle("-fx-stroke: green;");
         } else {
-            etfValueLabel.setTextFill(Color.DARKRED);
-            returnsText = new Text(String.format("- $%,.2f (%.2f%%)", returnsDollars, returnsPercentage));
+            etfValueLabel.setTextFill(Color.CRIMSON);
+            returnsText = new Text(String.format("- $%,.2f (%.2f%%)", returnsDollars.negate(), returnsPercentage));
             returnsText.setFill(Color.RED);
             series.getNode().setStyle("-fx-stroke: red;");
         }
         returnsText.setFont(Font.font("Arial", 14));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy");
-        Text dateText = new Text("  " + IStockMarket.LAST_DATE_ENTRY.format(formatter));
+        Text dateText = new Text("  " + stockMarket.getLastDateEntry().format(formatter));
         dateText.setFill(Color.BLACK);
         dateText.setFont(Font.font("Arial", 14));
 

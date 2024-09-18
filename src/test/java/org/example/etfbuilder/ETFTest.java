@@ -1,6 +1,8 @@
 package org.example.etfbuilder;
 
-import org.example.etfbuilder.interfaces.*;
+import org.example.etfbuilder.interfaces.IETF;
+import org.example.etfbuilder.interfaces.IETFAlgorithm;
+import org.example.etfbuilder.interfaces.IStockMarket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -2,7 +2,8 @@ package org.example.etfbuilder;
 
 import org.example.etfbuilder.interfaces.IIndexStrategy;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class IndexOnStringField implements IIndexStrategy {

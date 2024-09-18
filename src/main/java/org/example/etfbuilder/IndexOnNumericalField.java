@@ -3,7 +3,8 @@ package org.example.etfbuilder;
 import org.example.etfbuilder.interfaces.IIndexStrategy;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class IndexOnNumericalField implements IIndexStrategy {

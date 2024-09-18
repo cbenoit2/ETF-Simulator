@@ -4,13 +4,12 @@ import org.example.etfbuilder.interfaces.IStockMarket;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class StockMarket implements IStockMarket {
 
+    private final YearMonth firstDateEntry;
+    private final YearMonth lastDateEntry;
     private final Map<YearMonth, Map<String, Stock>> stockData;
     private final Map<YearMonth, BigDecimal> sp500Data;
 
@@ -21,6 +20,18 @@ public class StockMarket implements IStockMarket {
         }
         this.stockData = stockData;
         this.sp500Data = sp500Data;
+        this.firstDateEntry = Collections.min(stockData.keySet());
+        this.lastDateEntry = Collections.max(stockData.keySet());
+    }
+
+    @Override
+    public YearMonth getFirstDateEntry() {
+        return this.firstDateEntry;
+    }
+
+    @Override
+    public YearMonth getLastDateEntry() {
+        return this.lastDateEntry;
     }
 
     @Override
@@ -34,19 +45,6 @@ public class StockMarket implements IStockMarket {
         }
 
         return stockData.get(date).get(companyName);
-    }
-
-    @Override
-    public boolean addStock(Stock newStock, YearMonth date) {
-        if (newStock == null || date == null) {
-            return false;
-        }
-        stockData.putIfAbsent(date, new HashMap<>());
-        if (stockData.get(date).get(newStock.getName().toLowerCase()) == null) {
-            stockData.get(date).put(newStock.getName(), newStock);
-            return true;
-        }
-        return false;
     }
 
     @Override

@@ -20,8 +20,8 @@ public class ETFAlgorithm implements IETFAlgorithm {
         if (stockMarket == null || startDate == null || industry == null) {
             throw new IllegalArgumentException("input parameter is null");
         }
-        if (startDate.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
-                startDate.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (startDate.isBefore(stockMarket.getFirstDateEntry()) ||
+                startDate.isAfter(stockMarket.getLastDateEntry())) {
             throw new IllegalArgumentException("invalid date");
         }
         if (preferences.length != 5) {
@@ -263,11 +263,11 @@ public class ETFAlgorithm implements IETFAlgorithm {
         investmentsToMake.compute(topStock.getName(), (k, v) -> v.add(quantity));
         leftover = leftover.subtract(quantity.multiply(topStock.getPrice()));
         if (leftover.compareTo(BigDecimal.ZERO) > 0) {
-            investmentsToMake.put("Uninvested Cash", leftover);
+            investmentsToMake.put("Cash", leftover);
         }
         return investmentsToMake;
     }
-    
+
     private int percentileThreshold(List<Map.Entry<Stock, Double>> stockRankings,
                                     double percentile, int minNumStocks, int maxNumStocks) {
         int targetIndex = ((int) Math.ceil(((100 - percentile) / 100) * stockRankings.size())) - 1;
@@ -289,8 +289,8 @@ public class ETFAlgorithm implements IETFAlgorithm {
 
     private boolean isInvalidDate(YearMonth date) {
         return date == null || date.isBefore(currAlgoDate) ||
-                date.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
-                date.isAfter(IStockMarket.LAST_DATE_ENTRY);
+                date.isBefore(stockMarket.getFirstDateEntry()) ||
+                date.isAfter(stockMarket.getLastDateEntry());
     }
 
 

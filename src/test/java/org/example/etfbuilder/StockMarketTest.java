@@ -96,35 +96,6 @@ public class StockMarketTest {
     }
 
     @Test
-    public void testAddStockToExistentDateInMarket() {
-        Stock stock = new Stock("random");
-        assertTrue(market.addStock(stock, YearMonth.parse("2023-06")));
-    }
-
-    @Test
-    public void testAddStockToDateNotYetInMarket() {
-        Stock stock = new Stock("random");
-        assertTrue(market.addStock(stock, YearMonth.parse("2022-06")));
-    }
-
-    @Test
-    public void testAddStockDateAlreadyHasAssociatedStock() {
-        Stock stock = market.getStock("Aflac", YearMonth.parse("2023-06"));
-        assertFalse(market.addStock(stock, YearMonth.parse("2023-06")));
-    }
-
-    @Test
-    public void testAddStockNullDateEntered() {
-        Stock stock = new Stock("random");
-        assertFalse(market.addStock(stock, null));
-    }
-
-    @Test
-    public void testAddStockAddNullStock() {
-        assertFalse(market.addStock(null, YearMonth.parse("2023-06")));
-    }
-
-    @Test
     public void testGetStocksOnDate() {
         Set<Stock> stocks = market.getStocksOnDate(YearMonth.parse("2023-06"));
         assertEquals(35, stocks.size());
@@ -138,7 +109,6 @@ public class StockMarketTest {
         stocks = market.getStocksOnDate(null);
         assertEquals(0, stocks.size());
     }
-
 
     @Test
     public void testGetSP500ValueOnDateReturnsCorrectValue() {

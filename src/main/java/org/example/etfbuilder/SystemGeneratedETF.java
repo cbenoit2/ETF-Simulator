@@ -4,6 +4,7 @@ import org.example.etfbuilder.interfaces.IETFAlgorithm;
 import org.example.etfbuilder.interfaces.IStockMarket;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,13 +15,11 @@ import java.util.Set;
 public class SystemGeneratedETF extends ETF {
 
     private final IETFAlgorithm algo;
-    private final BigDecimal dollarsToInvest;
     private final int reinvestmentRate;
-    private boolean initialized;
 
     public SystemGeneratedETF(IStockMarket market, IETFAlgorithm algorithm,
                               BigDecimal dollarsToInvest, int reinvestmentRate) {
-        if (market == null || algorithm == null) {
+        if (market == null || algorithm == null || dollarsToInvest == null) {
             throw new IllegalArgumentException("input parameter is null");
         }
         if (reinvestmentRate < 0) {
@@ -30,14 +29,13 @@ public class SystemGeneratedETF extends ETF {
             throw new IllegalArgumentException("initial investment must be greater than $0");
         }
         this.systemGenerated = true;
-        this.initialized = false;
         this.stocksInETF = new HashMap<>();
         this.etfPositions = new HashMap<>();
         this.startDate = algorithm.getCurrAlgoDate();
         this.stockMarket = market;
         this.algo = algorithm;
-        this.dollarsToInvest = dollarsToInvest;
         this.reinvestmentRate = reinvestmentRate;
+        initializeETF(dollarsToInvest.setScale(4, RoundingMode.DOWN));
     }
 
 
@@ -45,28 +43,22 @@ public class SystemGeneratedETF extends ETF {
         return this.reinvestmentRate;
     }
 
-
-    public void initializeETF() {
-        if (initialized) {
-            return;
-        }
+    private void initializeETF(BigDecimal dollarsToInvest) {
         Map<String, BigDecimal> stockSelections = algo.runAlgorithm(dollarsToInvest, startDate);
         for (Map.Entry<String, BigDecimal> entry : stockSelections.entrySet()) {
             String companyName = entry.getKey();
-            if (companyName.equals("Uninvested Cash")) {
+            if (companyName.equals("Cash")) {
                 etfPositions.put(companyName, entry.getValue());
             } else {
                 BigDecimal quantity = entry.getValue();
                 buyStock(companyName, quantity, startDate);
             }
         }
-        this.initialized = true;
     }
 
-
     public void updateETF(YearMonth currDate) {
-        if (!initialized || !currDate.isAfter(startDate) || isInvalidDate(currDate)) {
-            return;
+        if (isInvalidDate(currDate) || !currDate.isAfter(startDate)) {
+            throw new IllegalArgumentException();
         }
 
         BigDecimal dollarsToInvest = getETFValue(currDate);
@@ -75,13 +67,11 @@ public class SystemGeneratedETF extends ETF {
         // buy and sell stock to align with stock selections
         for (Map.Entry<String, BigDecimal> entry : stockSelections.entrySet()) {
             String companyName = entry.getKey();
-            if (companyName.equals("Uninvested Cash")) {
+            if (companyName.equals("Cash")) {
                 etfPositions.put(companyName, entry.getValue());
             } else {
-
                 BigDecimal targetQuantity = entry.getValue();
-                BigDecimal currQuantityHeld = etfPositions.getOrDefault(companyName, BigDecimal.ZERO);
-
+                BigDecimal currQuantityHeld = getTotalQuantityHeld(companyName);
                 if (targetQuantity.compareTo(currQuantityHeld) > 0) {
                     buyStock(companyName, targetQuantity.subtract(currQuantityHeld), currDate);
                 } else if (targetQuantity.compareTo(currQuantityHeld) < 0) {
@@ -111,8 +101,8 @@ public class SystemGeneratedETF extends ETF {
 
         BigDecimal etfValue = BigDecimal.ZERO;
         for (String companyName : etfPositions.keySet()) {
-            if (companyName.equals("Uninvested Cash")) {
-                etfValue = etfValue.add(etfPositions.get("Uninvested Cash"));
+            if (companyName.equals("Cash")) {
+                etfValue = etfValue.add(etfPositions.get("Cash"));
             } else {
                 BigDecimal totalQuantity = getTotalQuantityHeld(companyName);
                 BigDecimal currStockPrice = stockMarket.getStock(companyName, date).getPrice();

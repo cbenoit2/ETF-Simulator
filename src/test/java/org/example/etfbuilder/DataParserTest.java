@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DataParserTest {
 
-    private IDataParser dp = new DataParser();
+    private final IDataParser dp = new DataParser();
 
     @Test
     public void testParseStockDataReturnMapContainsAllDates() throws IOException {

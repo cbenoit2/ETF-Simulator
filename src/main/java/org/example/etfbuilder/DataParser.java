@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DataParser implements IDataParser {
-    // todo may format pe ratio to 2-4 decimal places
 
     @Override
     public Map<YearMonth, Map<String, Stock>> parseStockData(String csvFile) throws IOException {

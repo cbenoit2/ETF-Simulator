@@ -4,9 +4,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
-
 import org.controlsfx.control.SearchableComboBox;
-import org.example.etfbuilder.*;
+import org.example.etfbuilder.ETFAlgorithm;
+import org.example.etfbuilder.ETFBuilderApplication;
+import org.example.etfbuilder.SystemGeneratedETF;
 import org.example.etfbuilder.interfaces.IETF;
 import org.example.etfbuilder.interfaces.IETFAlgorithm;
 import org.example.etfbuilder.interfaces.IStockMarket;

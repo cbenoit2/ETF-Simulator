@@ -9,7 +9,7 @@ import java.time.YearMonth;
 import java.util.*;
 
 public abstract class ETF implements IETF {
-    
+
     protected boolean systemGenerated;
     protected String name;
     protected YearMonth startDate;
@@ -136,13 +136,16 @@ public abstract class ETF implements IETF {
 
     protected boolean isInvalidDate(YearMonth date) {
         return date == null || date.isBefore(startDate) ||
-                date.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
-                date.isAfter(IStockMarket.LAST_DATE_ENTRY);
+                date.isBefore(stockMarket.getFirstDateEntry()) ||
+                date.isAfter(stockMarket.getLastDateEntry());
     }
 
     protected BigDecimal getTotalQuantityHeld(String companyName) {
-        Queue<Map.Entry<Stock, BigDecimal>> stockQueue = stocksInETF.get(companyName);
+        if (!etfPositions.containsKey(companyName)) {
+            return BigDecimal.ZERO;
+        }
 
+        Queue<Map.Entry<Stock, BigDecimal>> stockQueue = stocksInETF.get(companyName);
         BigDecimal totalQuantity = BigDecimal.ZERO;
         for (Map.Entry<Stock, BigDecimal> entry : stockQueue) {
             totalQuantity = totalQuantity.add(entry.getValue());

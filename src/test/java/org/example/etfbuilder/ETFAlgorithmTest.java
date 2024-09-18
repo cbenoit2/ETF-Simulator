@@ -2,6 +2,7 @@ package org.example.etfbuilder;
 
 
 import org.example.etfbuilder.interfaces.IETFAlgorithm;
+import org.example.etfbuilder.interfaces.IStockMarket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -10,12 +11,13 @@ import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class ETFAlgorithmTest {
 
-    private static StockMarket market;
+    private static IStockMarket market;
     private static YearMonth startDate;
     private static double[] pref;
 
@@ -308,7 +310,7 @@ public class ETFAlgorithmTest {
         expected.put("Vulcan Materials Company", new BigDecimal("2.05"));
         expected.put("Chipotle Mexican Grill", new BigDecimal("0.21"));
         expected.put("Halliburton", new BigDecimal("12.93"));
-        expected.put("Uninvested Cash", new BigDecimal("0.0821"));
+        expected.put("Cash", new BigDecimal("0.0821"));
 
         Map<String, BigDecimal> actual = algo.runAlgorithm(new BigDecimal("6780.33"), startDate);
 

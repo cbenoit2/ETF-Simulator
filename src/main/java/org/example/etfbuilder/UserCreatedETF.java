@@ -11,8 +11,8 @@ public class UserCreatedETF extends ETF {
         if (market == null || startDate == null) {
             throw new IllegalArgumentException("input parameter is null");
         }
-        if (startDate.isBefore(IStockMarket.FIRST_DATE_ENTRY) ||
-                startDate.isAfter(IStockMarket.LAST_DATE_ENTRY)) {
+        if (startDate.isBefore(market.getFirstDateEntry()) ||
+                startDate.isAfter(market.getLastDateEntry())) {
             throw new IllegalArgumentException("invalid date");
         }
 

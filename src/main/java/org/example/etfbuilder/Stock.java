@@ -14,13 +14,6 @@ public class Stock {
     private BigDecimal salesGrowth;
     private BigDecimal peRatio;
 
-    /**
-     * Constructs a new Stock with the inputted name and its share
-     * price set to the inputted price
-     *
-     * @param name  the name of the stock
-     * @param price the price of the stock
-     */
     public Stock(String name, BigDecimal price) {
         if (price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("stock price cannot be negative");
@@ -29,11 +22,6 @@ public class Stock {
         this.price = price;
     }
 
-    /**
-     * For testing
-     *
-     * @param name the name of the stock
-     */
     public Stock(String name) {
         this.name = name;
     }

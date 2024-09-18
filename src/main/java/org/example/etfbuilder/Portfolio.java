@@ -10,6 +10,7 @@ import java.util.*;
 
 public class Portfolio implements IPortfolio {
 
+    // represented as a list to maintain order of ETFS in GUI
     private final List<IETF> etfsInPortfolio;
     private final Map<IETF, Map<YearMonth, BigDecimal[]>> portfolioReturns;
 
@@ -38,8 +39,6 @@ public class Portfolio implements IPortfolio {
 
     @Override
     public Map<YearMonth, BigDecimal[]> runSimulationOnETF(IETF etf, YearMonth endDate) {
-        // todo error handling
-
         portfolioReturns.putIfAbsent(etf, new TreeMap<>());
         if (etf.isSystemGenerated()) {
             simulateSystemGeneratedETF((SystemGeneratedETF) etf, endDate);
@@ -61,8 +60,6 @@ public class Portfolio implements IPortfolio {
     }
 
     private void simulateSystemGeneratedETF(SystemGeneratedETF etf, YearMonth endDate) {
-        etf.initializeETF();
-
         YearMonth currDate = etf.getStartDate();
         int reinvestmentRate = etf.getReinvestmentRate();
         YearMonth reinvestmentDate = currDate.plusMonths(reinvestmentRate);
@@ -81,7 +78,6 @@ public class Portfolio implements IPortfolio {
 
     @Override
     public Map<IETF, Map<YearMonth, BigDecimal[]>> runSimulationOnPortfolio(YearMonth endDate) {
-        // todo error handling
         for (IETF etf : etfsInPortfolio) {
             runSimulationOnETF(etf, endDate);
         }
@@ -99,7 +95,6 @@ public class Portfolio implements IPortfolio {
 
     @Override
     public Map<YearMonth, BigDecimal[]> getETFReturns(IETF etf, YearMonth fromDate, YearMonth toDate) {
-        // todo error handling
         if (!etfsInPortfolio.contains(etf)) {
             return new TreeMap<>();
         }
@@ -113,6 +108,8 @@ public class Portfolio implements IPortfolio {
                 toDate, true);
     }
 
+    // gets the monthly total returns (%) if someone invested in the SP500 starting on investmentStart
+    // until investmentEnd
     @Override
     public Map<YearMonth, BigDecimal> getMarketReturns(Map<YearMonth, BigDecimal> sp500Value,
                                                        YearMonth investmentStart, YearMonth investmentEnd) {

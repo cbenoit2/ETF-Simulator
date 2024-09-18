@@ -1,3 +1,7 @@
+/**
+ * @author Chloe Benoit and Justin Summers (justin2justin)
+ */
+
 package org.example.etfbuilder;
 
 import org.example.etfbuilder.interfaces.IETFAlgorithm;

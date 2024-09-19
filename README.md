@@ -3,7 +3,7 @@ Note: This project was initially a group project for the course CIT 594: Data St
 # **ETF Builder: An ETF Simulator**
 
 ### **Overview:**
-ETF Builder is a Java-based computer application designed to construct, simulate and analyze the performance of Exchange Traded Funds (ETFs) over time. The simulator integrates market data processing, portfolio management, and various financial metrics calculations to provide a comprehensive tool for ETF strategy testing and analysis. 
+ETF Builder is a Java-based desktop application designed to construct, simulate and analyze the performance of Exchange Traded Funds (ETFs) over time. The simulator integrates market data processing, portfolio management, and various financial metrics calculations to provide a comprehensive tool for ETF strategy testing and analysis. 
 
 ### **Data:**
 Supporting data consists of various financial metrics for the 393 members of the S&P500 that have been a member of this group since 2010. Data is calculated monthly between January 2010 - March 2024. All data per Bloomberg. 

@@ -10,7 +10,7 @@ Supporting data consists of various financial metrics for the 393 members of the
 
 ### **Features:**
 - #### ETF Construction:
-  - User can input criteria which are used in conjunction with an alogrithm to produce an ETF
+  - User can input criteria which are used in conjunction with an alogrithm to produce an ETF.
      - Key Parameters
        1. Stock evaluation preferences (Score ETF constuction priorities must add to 100)
           - Net Income

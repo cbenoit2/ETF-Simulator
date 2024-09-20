@@ -18,7 +18,7 @@ Supporting data consists of various financial metrics for the 393 members of the
           * PE Ratio
           * YoY Sales Growth %
           * Net Debt - Common Ratio
-        2. Industry selection (use "All" if do not want to limit by industry)
+        2. Industry selection (use "All" if you do not want to limit by industry)
         3. ETF reinvestment rate (month period between re-balancing ETF)
         4. Dollars available to invest
         
@@ -28,7 +28,7 @@ Supporting data consists of various financial metrics for the 393 members of the
   -  Automatically tests and adjusts algorithm-created ETF compositions based on custom-defined strategies.
 
 - #### Portfolio Simulation:
-  - Calculates monthly total returns for each ETF in the portfolio, with the option to compare the ETF's returns to returns that would have been achieved if the user invested in the S&P500 index instead.
+  - Calculates monthly total returns for each ETF in the portfolio, with the option to compare the ETF's returns to returns achieved by the S&P500 index.
 
 ### **Usage:**
 Run ETFBuilderApplication with the following VM option: --add-exports=javafx.base/com.sun.javafx.event=org.controlsfx.controls

@@ -1,4 +1,4 @@
-Note: This project was initially a group project for the course CIT 594: Data Structures & Software Design. Since then, I have independently redesigned it to enhance functionality and improve overall user experience.
+Note: This project was initially a group project for a Data Structures & Software Design course. Since then, I have independently redesigned it to enhance functionality and improve overall user experience.
 
 # **ETF Builder: An ETF Simulator**
 
